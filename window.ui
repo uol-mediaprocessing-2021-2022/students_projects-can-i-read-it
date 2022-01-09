@@ -21,7 +21,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>820</y>
+      <y>830</y>
       <width>391</width>
       <height>31</height>
      </rect>
@@ -34,7 +34,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>850</y>
+      <y>880</y>
       <width>391</width>
       <height>31</height>
      </rect>
@@ -89,6 +89,19 @@
     </property>
     <property name="scaledContents">
      <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="cropButton">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>860</y>
+      <width>391</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Crop Image</string>
     </property>
    </widget>
   </widget>

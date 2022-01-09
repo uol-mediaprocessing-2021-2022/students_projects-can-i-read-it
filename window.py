@@ -68,8 +68,7 @@ class ResizableRubberBand(QWidget):
                     event.ignore()
                 self.mousePressPos = None
         super(ResizableRubberBand, self).mouseReleaseEvent(event)
-
-
+        
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -83,12 +82,14 @@ class MainWindow(QMainWindow):
         # define widgets
         self.openButton = self.findChild(QPushButton, "openButton")
         self.runButton = self.findChild(QPushButton, "runButton")
+        self.cropButton = self.findChild(QPushButton, "cropButton")
         self.zoomInButton = self.findChild(QPushButton, "zoomInButton")
         self.zoomOutButton = self.findChild(QPushButton, "zoomOutButton")
         self.imageLabel = self.findChild(QLabel, "imageLabel")
 
         self.openButton.clicked.connect(self.handleOpen)
-        self.runButton.clicked.connect(self.handleCrop)
+        self.cropButton.clicked.connect(self.handleCrop)
+        self.runButton.clicked.connect(self.handleRun)
         self.zoomInButton.clicked.connect(self.zoomIn)
         self.zoomOutButton.clicked.connect(self.zoomOut)
         # display app
@@ -114,6 +115,21 @@ class MainWindow(QMainWindow):
     def handleCrop(self):
         self.band = ResizableRubberBand(self.imageLabel)
         self.band.setGeometry(150, 150, 150, 150)
+
+    def handleRun(self):
+       print("running analysis") 
+       if self.band:
+           self.coords = self.band.geometry().getCoords()
+           y1 = self.coords[0]
+           x1 = self.coords[1]
+           y2 = self.coords[2]
+           x2 = self.coords[3]
+           self.cropped = self.cvOrig[y1 : y2, x1 : x2].copy()
+           self.pixmap = QPixmap(self.openCVtoQImage(self.cropped)) 
+           self.imageLabel.setPixmap(self.pixmap)
+           self.imageLabel.adjustSize()
+
+           
 
     def scalePixmap(self):
        self.pixmap = QPixmap(self.openCVtoQImage(self.cvOrig)) 
