@@ -106,46 +106,46 @@ class MainWindow(QMainWindow):
         if image_path:
             self.cvOrig = cv.cvtColor(cv.imread(image_path[0]), cv.COLOR_BGR2RGB)
             self.h, self.w = self.cvOrig.shape[:2]
-            self.pixmap = QPixmap(self.openCVtoQImage(self.cvOrig))
-            self.currentScaling = 1 
-            self.scalePixmap()
-            self.imageLabel.setPixmap(self.pixmap)
+            self.scalePercent = 100
+            self.scaleImage()
             self.imageLabel.adjustSize()
 
     def handleCrop(self):
         self.band = ResizableRubberBand(self.imageLabel)
-        self.band.setGeometry(150, 150, 150, 150)
+        self.band.setGeometry(0, 0, 150, 150)
 
     def handleRun(self):
        print("running analysis") 
        if self.band:
            self.coords = self.band.geometry().getCoords()
-           y1 = self.coords[0]
-           x1 = self.coords[1]
-           y2 = self.coords[2]
-           x2 = self.coords[3]
-           self.cropped = self.cvOrig[y1 : y2, x1 : x2].copy()
-           self.pixmap = QPixmap(self.openCVtoQImage(self.cropped)) 
+           y1, x1, y2, x2 = self.coords
+           img = self.cvOrig.copy()
+           dim = (int(img.shape[1] * self.scalePercent / 100), int(img.shape[0] * self.scalePercent / 100))
+           img = cv.resize(img, dim, interpolation=cv.INTER_LINEAR_EXACT)
+           cropped = img[y1 : y2, x1 : x2].copy()
+           self.pixmap = QPixmap(self.openCVtoQImage(cropped)) 
            self.imageLabel.setPixmap(self.pixmap)
            self.imageLabel.adjustSize()
 
-           
-
-    def scalePixmap(self):
-       self.pixmap = QPixmap(self.openCVtoQImage(self.cvOrig)) 
-       self.pixmap = self.pixmap.scaled(int(self.h * self.currentScaling), int(self.w * self.currentScaling), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
-              
-    def zoomIn(self):
-        self.currentScaling += 0.1 
-        self.scalePixmap()
+    def scaleImage(self):
+        img = self.cvOrig.copy()
+        dim = (int(img.shape[1] * self.scalePercent / 100), int(img.shape[0] * self.scalePercent / 100))
+        self.pixmap = QPixmap(self.openCVtoQImage(cv.resize(img, dim, interpolation=cv.INTER_LINEAR_EXACT)))
+        self.pixmap = self.pixmap.scaled(int(self.h * (self.scalePercent / 100)), int(self.w * (self.scalePercent / 100)), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
         self.imageLabel.setPixmap(self.pixmap)
+       
         self.imageLabel.adjustSize()
+        
+       
+    def zoomIn(self):   
+       if self.scalePercent < 200:
+            self.scalePercent += 10 
+            self.scaleImage()
     
     def zoomOut(self):
-        self.currentScaling -= 0.1
-        self.scalePixmap()
-        self.imageLabel.setPixmap(self.pixmap)
-        self.imageLabel.adjustSize()
+        if self.scalePercent > 10:
+            self.scalePercent -= 10
+            self.scaleImage()
 
     def openCVtoQImage(self, cvImg):
         h, w = cvImg.shape[:2]
