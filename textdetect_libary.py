@@ -33,6 +33,7 @@ def runAnalysis(img):
         # perform radon_transform to the pictures
         M = get_radon_matrix(img)
         preprocessed_list = rotate(preprocessed_list, M)
+        boxes_list = east_detect(preprocessed_list)
         
 
 
@@ -119,7 +120,110 @@ def rotate(preprocessed_list, radon_matrix, h, w):
         return preprocessed_list
 
 
-def east_detect(preprocessed_list_rotated):
+def east_detect(preprocessed_list):
+        # Create list that will contain cordinates of found text boxes for each image
+        boxes_list = []
+        # Set min confidence for text detection
+        min_score = 0.99 # Adjustable
+        # Set scaling resolution, must be multiple of 32 for EAST
+        res = 1280 # 1280x1280 works good
+        for index, img_idx in enumerate(preprocessed_list):
+                # Create copy and grab image dimensions
+                orig = preprocessed_list[img_idx].copy()
+                orig_rectangles = preprocessed_list[img_idx].copy()
+                (H, W) = orig.shape[:2]
+
+                # Adjust image dimensions
+                (newW, newH) = (res, res)
+                rW = W / float(newW)
+                rH = H / float(newH)
+
+                preprocessed_img = cv.resize(preprocessed_list[img_idx], (newW, newH))
+                (H, W) = preprocessed_img.shape[:2]
+
+                # 2 layers are needed, the confiidences of the predictions and koordinates of found Text
+                layerNames = [
+                        "feature_fusion/Conv_7/Sigmoid",
+                        "feature_fusion/concat_3"]
+
+                # Load EAST
+                print("[INFO] Initializing text detection with EAST [" + str(index + 1) + "/" + str(len(preprocessed_list)) + "]")
+                net = cv.dnn.readNet('/east/frozen_east_text_detection.pb')
+                net.setPreferableBackend(cv.dnn.DNN_BACKEND_CUDA)
+                net.setPreferableTarget(cv.dnn.DNN_TARGET_CUDA)
+
+                # Create a "blob" and generate output using the trained model
+                blob = cv.dnn.blobFromImage(preprocessed_img, 1.0, (W, H),(123.68, 116.78, 103.94), swapRB=True, crop=False)
+                start = time.time()
+                net.setInput(blob)
+                (scores, geometry) = net.forward(layerNames)
+                end = time.time()
+
+                print("[INFO] text detection took {:.6f} seconds".format(end - start))
+ 
+                # Grab the number of rows and columns from the scores volume, then
+                # initialize our set of bounding box rectangles and corresponding
+                # confidence scores
+                (numRows, numCols) = scores.shape[2:4]
+                rects = []
+                confidences = []
+
+                # Iterate the rows
+                for y in range(0, numRows):
+                        # Extract the scores alongside the cordinates of found text
+                        scoresData = scores[0, 0, y]
+                        xData0 = geometry[0, 0, y]
+                        xData1 = geometry[0, 1, y]
+                        xData2 = geometry[0, 2, y]
+                        xData3 = geometry[0, 3, y]
+                        anglesData = geometry[0, 4, y]
+                        # Iterate columns
+                        for x in range(0, numCols):
+                                # Ignore scores below the threshold
+                                if scoresData[x] < min_score:
+                                        continue
+                                # Calculate offset factor as our resulting feature maps will
+                                # be 4x smaller than the input image
+                                (offsetX, offsetY) = (x * 4.0, y * 4.0)
+                                # Calculate rotation angle
+                                angle = anglesData[x]
+                                cos = np.cos(angle)
+                                sin = np.sin(angle)
+                                # Calculate width and height of the bounding box
+                                h = xData0[x] + xData2[x]
+                                w = xData1[x] + xData3[x]
+                                # Caclulate cordinates of the bounding box
+                                endX = int(offsetX + (cos * xData1[x]) + (sin * xData2[x]))
+                                endY = int(offsetY - (sin * xData1[x]) + (cos * xData2[x]))
+                                startX = int(endX - w)
+                                startY = int(endY - h)
+                                # Add the bounding box coordinates and probability score to
+                                # our respective lists
+                                rects.append((startX, startY, endX, endY))
+                                confidences.append(scoresData[x])
+                
+                # Apply non-maxima suppression to suppress weak, overlapping bounding boxes
+                boxes = non_max_suppression(np.array(rects), probs=confidences)
+
+                # Iterate all boxes of an image
+                for (startX, startY, endX, endY) in boxes:
+                        # Rescale the boxes
+                        startX = int(startX * rW)
+                        startY = int(startY * rH)
+                        endX = int(endX * rW)
+                        endY = int(endY * rH)
+                        # Draw boxes in output image
+                        cv.rectangle(orig_rectangles, (startX, startY), (endX, endY), (0, 255, 0), 3)
+
+                # Add boxes to list containing all boxes for an image
+                boxes_list.append(boxes)
+        return boxes_list
+
+
+
+
+
+
 
 
 
