@@ -30,9 +30,10 @@ def cropImage(cvImg, y1, x1, y2, x2, scalePercent):
 def runAnalysis(img):
         h, w = img.shape
         preprocessed_list, preprocessed_names_list = preprocess_image(img)
-        # Add the original image to the list
+        # perform radon_transform to the pictures
         M = get_radon_matrix(img)
-        preprocessed_list_rotated = rotate(preprocessed_list, M)
+        preprocessed_list = rotate(preprocessed_list, M)
+        
 
 
 def preprocess_image(img):
@@ -111,14 +112,14 @@ def get_radon_matrix(img):
 
 #returns List containing preprocessed and rotated images
 def rotate(preprocessed_list, radon_matrix, h, w):
-        
         preprocessed_list_rotated = []
         for idx, image in enumerate(preprocessed_list):
                 preprocessed_list_rotated.append(cv.warpAffine(preprocessed_list[idx], radon_matrix, (w, h)))
                 preprocessed_list[idx] = preprocessed_list_rotated[idx]
-        return preprocessed_list_rotated
+        return preprocessed_list
 
 
+def east_detect(preprocessed_list_rotated):
 
 
 
