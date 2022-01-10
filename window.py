@@ -1,9 +1,9 @@
+import sys
 import cv2 as cv
-import numpy as np
 from PyQt5.QtWidgets import QLabel, QMainWindow, QApplication,  QPushButton, QFileDialog, QWidget, QHBoxLayout,  QSizeGrip, QRubberBand
 from PyQt5.QtGui import QPixmap, QImage, QPainter
 from PyQt5 import uic, QtCore
-import sys
+from textdetect_libary import *
 
 class ResizableRubberBand(QWidget):
     def __init__(self, parent=None):
@@ -107,7 +107,8 @@ class MainWindow(QMainWindow):
             self.cvOrig = cv.cvtColor(cv.imread(image_path[0]), cv.COLOR_BGR2RGB)
             self.h, self.w = self.cvOrig.shape[:2]
             self.scalePercent = 100
-            self.scaleImage()
+            self.pixmap = QPixmap(openCVtoQImage(self.cvOrig))
+            self.imageLabel.setPixmap(self.pixmap)
             self.imageLabel.adjustSize()
 
     def handleCrop(self):
@@ -117,41 +118,25 @@ class MainWindow(QMainWindow):
     def handleRun(self):
        print("running analysis") 
        if self.band:
-           self.coords = self.band.geometry().getCoords()
-           y1, x1, y2, x2 = self.coords
-           img = self.cvOrig.copy()
-           dim = (int(img.shape[1] * self.scalePercent / 100), int(img.shape[0] * self.scalePercent / 100))
-           img = cv.resize(img, dim, interpolation=cv.INTER_LINEAR_EXACT)
-           cropped = img[y1 : y2, x1 : x2].copy()
-           self.pixmap = QPixmap(self.openCVtoQImage(cropped)) 
+           x1, y1, x2, y2 = self.band.geometry().getCoords()
+           cropped = cropImage(self.cvOrig.copy(), y1, x1, y2, x2, self.scalePercent)
+           self.pixmap = QPixmap(openCVtoQImage(cropped)) 
            self.imageLabel.setPixmap(self.pixmap)
            self.imageLabel.adjustSize()
 
-    def scaleImage(self):
-        img = self.cvOrig.copy()
-        dim = (int(img.shape[1] * self.scalePercent / 100), int(img.shape[0] * self.scalePercent / 100))
-        self.pixmap = QPixmap(self.openCVtoQImage(cv.resize(img, dim, interpolation=cv.INTER_LINEAR_EXACT)))
-        self.pixmap = self.pixmap.scaled(int(self.h * (self.scalePercent / 100)), int(self.w * (self.scalePercent / 100)), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
-        self.imageLabel.setPixmap(self.pixmap)
-       
-        self.imageLabel.adjustSize()
-        
-       
     def zoomIn(self):   
        if self.scalePercent < 200:
             self.scalePercent += 10 
-            self.scaleImage()
-    
+            self.imageLabel.setPixmap(scaleImage(self.cvOrig.copy(), self.scalePercent, self.h, self.w))
+            self.imageLabel.adjustSize()
+        
+        
     def zoomOut(self):
         if self.scalePercent > 10:
-            self.scalePercent -= 10
-            self.scaleImage()
-
-    def openCVtoQImage(self, cvImg):
-        h, w = cvImg.shape[:2]
-        qImg = QImage(cvImg.data, w, h, 3 * w, QImage.Format_RGB888) 
-        return qImg
-
+            self.scalePercent -= 10 
+            self.imageLabel.setPixmap(scaleImage(self.cvOrig, self.scalePercent, self.h, self.w))
+            self.imageLabel.adjustSize()
+ 
 
 
 # initialize app
