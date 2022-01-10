@@ -28,8 +28,12 @@ def cropImage(cvImg, y1, x1, y2, x2, scalePercent):
         return cropped
 
 def runAnalysis(img):
+        h, w = img.shape
         preprocessed_list, preprocessed_names_list = preprocess_image(img)
         # Add the original image to the list
+        M = get_radon_matrix(img)
+        preprocessed_list_rotated = rotate(preprocessed_list, M)
+
 
 def preprocess_image(img):
         # Create a list to store all preprocessed versions
@@ -80,6 +84,40 @@ def preprocess_image(img):
         preprocessed_list[5] = dst
         preprocessed_names_list[5] = "Laplace + Gauss"
         return (preprocessed_list, preprocessed_names_list)
+
+# gets the rotation matrix from the image
+def get_radon_matrix(img):
+        radon_preprocess = img.copy()
+        I = cv.cvtColor(radon_preprocess, cv.COLOR_BGR2GRAY)
+        h, w = I.shape
+        I = I[0:3000, 400:2200] #<- For testin only, manual cropping of image
+        # If the resolution is high, resize the image to reduce processing time.
+        if (w > 640):
+                 I = cv.resize(I, (640, int((h / w) * 640)))
+        I = I - np.mean(I)  # Demean; make the brightness extend above and below zero
+
+        # Do the radon transform
+        sinogram = transform.radon(I)
+        # Find the RMS value of each row and find "busiest" rotation,
+        # where the transform is lined up perfectly with the alternating dark
+        # text and white lines
+        r = np.array([np.sqrt(np.mean(np.abs(line) ** 2)) for line in sinogram.transpose()])
+        rotation = np.argmax(r)
+        print('Rotation: {:.2f} degrees'.format(90 - rotation))
+
+        # Rotate and save with the original resolution
+        M = cv.getRotationMatrix2D((w/2, h/2), 90 - rotation, 1)
+        return M
+
+#returns List containing preprocessed and rotated images
+def rotate(preprocessed_list, radon_matrix, h, w):
+        
+        preprocessed_list_rotated = []
+        for idx, image in enumerate(preprocessed_list):
+                preprocessed_list_rotated.append(cv.warpAffine(preprocessed_list[idx], radon_matrix, (w, h)))
+                preprocessed_list[idx] = preprocessed_list_rotated[idx]
+        return preprocessed_list_rotated
+
 
 
 
