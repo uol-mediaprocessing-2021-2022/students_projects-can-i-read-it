@@ -34,6 +34,9 @@ def runAnalysis(img):
         M = get_radon_matrix(img)
         preprocessed_list = rotate(preprocessed_list, M)
         boxes_list = east_detect(preprocessed_list)
+        img_index = 3 # Set index of image used for text position detection
+        margin = 7 # To account for inaccuracy set amount to increase each boundary by  
+        sorted_boxes = sort_boxes(boxes_list[img_index].tolist())
         
 
 
@@ -217,7 +220,36 @@ def east_detect(preprocessed_list):
 
                 # Add boxes to list containing all boxes for an image
                 boxes_list.append(boxes)
-        return boxes_list
+
+
+# Sort each boxes array
+def sort_boxes(to_sort):
+        sorted_boxes_tmp = []
+
+        to_sort = sorted(to_sort, key=lambda k: [k[1], k[0]])
+
+        row = []
+
+        # Find all words within the same line and append them into a list
+        while(len(to_sort) > 0):
+                for rect in to_sort:
+                        if len(to_sort) > 0:
+                                y_new = get_center(to_sort[0])[1]
+                                y_range = range(rect[1], rect[3])
+
+                                if y_new in y_range:
+                                        row.append(rect)
+    
+                to_sort = [i for i in to_sort if i not in row] 
+
+                to_sort = sorted(to_sort, key=lambda k: [k[1], k[0]])
+                row = sorted(row, key=lambda k: [k[0], k[1]])
+                sorted_boxes_tmp.append(row)
+                row = []
+
+        return sorted_boxes_tmp
+
+
 
 
 
