@@ -6,6 +6,8 @@ from PyQt5.QtGui import QImage, QPixmap
 from skimage import transform
 from imutils.object_detection import non_max_suppression
 import time
+import difflib
+
 
 
 def openCVtoQImage(cvImg):
@@ -33,10 +35,11 @@ def runAnalysis(img):
         # perform radon_transform to the pictures
         M = get_radon_matrix(img)
         preprocessed_list = rotate(preprocessed_list, M)
-        boxes_list = east_detect(preprocessed_list)
+        boxes_list, rW, rH = east_detect(preprocessed_list)
         img_index = 3 # Set index of image used for text position detection
         margin = 7 # To account for inaccuracy set amount to increase each boundary by  
         sorted_boxes = sort_boxes(boxes_list[img_index].tolist())
+        connected_boxes = connect_boxes(preprocessed_list. sorted_boxes, img_index, rW, rH)  
         
 
 
@@ -220,6 +223,7 @@ def east_detect(preprocessed_list):
 
                 # Add boxes to list containing all boxes for an image
                 boxes_list.append(boxes)
+        return boxes_list, rW, rH
 
 
 # Sort each boxes array
@@ -249,14 +253,71 @@ def sort_boxes(to_sort):
 
         return sorted_boxes_tmp
 
+# Method for checking whether a point is in a bounding box
+def check_x_intersection(point, range, connect_range):
+        i = 0
+        while i <= connect_range:
+                if point+i in range:
+                        return True
+                i = i + 2
+                return False
+
+# Method for calculating the coordinates of a point on the right side of a bounding box
+def get_reach(box):
+        return int(box[2]), int((box[1] + box[3]) / 2)
+
+def connect_boxes(preprocessed_list, boxes_list, img_index, rW, rH):
+        connect_range = 16 # Max distance between boxes that will be connected, must be multiple of 2
+        height_correction = 20
+        # List containing connected boxes
+        connected_boxes = []
+
+        rect_list = boxes_list[img_index].tolist()
+        rect_list = sorted(rect_list, key=lambda k: [k[0], k[1]])
 
 
+        # Check whether a bounding box has a close neighbor to it's right, in that case both are 'connected'
+        while(len(rect_list) > 0):
 
+                curr_rect = rect_list[0]
+                rect_reach = get_reach(curr_rect)
 
+                curr_x1 = curr_rect[0]
+                curr_x2 = curr_rect[2]
+                curr_y1 = curr_rect[1]
+                curr_y2 = curr_rect[3]
 
+                boxes_to_remove = [curr_rect]
 
+        for rect in rect_list:
+                if check_x_intersection(rect_reach[0], range(rect[0], rect[2])) and rect_reach[1] in range(rect[1], rect[3]) and curr_y2-curr_y1-height_correction <= rect[3]-rect[1]:
+                        curr_x2 = rect[2]
+      
+                        if rect[1] < curr_y1:
+                                curr_y1 = rect[1]
+      
+                        if rect[3] > curr_y2:
+                                curr_y2 = rect[3]
+      
+                        rect_reach = get_reach(rect)
+                        boxes_to_remove.append(rect)
 
+                connected_boxes.append([curr_x1, curr_y1, curr_x2, curr_y2])
+                rect_list = [i for i in rect_list if i not in boxes_to_remove] 
 
+        # Draw the expanded boxes on this image
+        orig_connected_rectangles = preprocessed_list[img_index].copy()
 
+        # Iterate all boxes of an image
+        for (startX, startY, endX, endY) in connected_boxes:
+                # Rescale the boxes
+                startX = int(startX * rW)
+                startY = int(startY * rH)
+                endX = int(endX * rW)
+                endY = int(endY * rH)
+                # Draw boxes in output image
+                cv.rectangle(orig_connected_rectangles, (startX, startY), (endX, endY), (0, 255, 0), 3)
 
-
+        # Sort the boxes
+        connected_boxes = sort_boxes(connected_boxes)
+        return connected_boxes
