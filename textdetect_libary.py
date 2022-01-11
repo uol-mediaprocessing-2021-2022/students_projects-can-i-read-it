@@ -1,12 +1,13 @@
-import sys
+import os 
 import cv2 as cv
 import numpy as np
+import matplotlib.pyplot as plt
+import pytesseract
 from PyQt5 import QtCore
 from PyQt5.QtGui import QImage, QPixmap
 from skimage import transform
 from imutils.object_detection import non_max_suppression
 import time
-import difflib
 
 
 
@@ -24,22 +25,67 @@ def scaleImage(cvImg, scalePercent, h, w):
 
 def cropImage(cvImg, y1, x1, y2, x2, scalePercent):
         img = cvImg.copy()
-        dim = (int(img.shape[1] * scalePercent / 100), int(img.shape[0] * scalePercent / 100))
+        dim = (int(np.ceil(img.shape[1] * scalePercent / 100)), int(np.ceil(img.shape[0] * scalePercent / 100)))
         img = cv.resize(img, dim, interpolation=cv.INTER_LINEAR_EXACT)
         cropped = img[y1 : y2, x1 : x2].copy()
         return cropped
 
 def runAnalysis(img):
-        h, w = img.shape
-        preprocessed_list, preprocessed_names_list = preprocess_image(img)
+        h, w = img.shape[:2]
+        preprocessed_list, preprocessed_names_list = preprocess_image(img.copy())
         # perform radon_transform to the pictures
-        M = get_radon_matrix(img)
-        preprocessed_list = rotate(preprocessed_list, M)
+        M, h, w = get_radon_matrix(img.copy())
+        preprocessed_list = rotate(preprocessed_list, M, h, w)
         boxes_list, rW, rH = east_detect(preprocessed_list)
         img_index = 3 # Set index of image used for text position detection
         margin = 7 # To account for inaccuracy set amount to increase each boundary by  
         sorted_boxes = sort_boxes(boxes_list[img_index].tolist())
         connected_boxes = connect_boxes(preprocessed_list. sorted_boxes, img_index, rW, rH)  
+        tes_preprocess = preprocessed_list[0].copy()
+        # Parameters for tesseract preprocessing
+        scale_percent = 100 # percent of original size
+        blur_amount = 3 # how much blur to apply
+        bordersize = 10 # size of border to add
+        results = []
+        found_text_psm7 = ""
+
+        for index, elem in enumerate(connected_boxes):
+                curr_row = ""
+                for index2, (startX, startY, endX, endY) in enumerate(elem):
+    
+                        # Calculate adjusted margins 
+                        y_start = int(startY * rH)
+                        y_end = int(endY * rH)
+                        x_start = int(startX * rW)
+                        x_end = int(endX * rW)
+
+                        cropped_img = tes_preprocess[y_start:y_end, x_start:x_end]
+                        cropped_img = preprocess_tsrct(cropped_img)
+
+                        # Configuration setting for converting image to string
+                        configuration = ("-l deu+eng --oem 1 --psm 7")  
+
+                        # This will recognize the text from the image of the bounding box
+                        d = pytesseract.image_to_data(cropped_img, output_type=pytesseract.Output.DICT, config=configuration)
+
+                        text = ""
+
+                        for index3, word in enumerate(d['text']):
+                                if int(d['conf'][index3]) >= 50:
+                                        text = text + word + " "
+
+                        # Append detected text to current line of text and clear unwanted symbols
+                        text = text.replace("|","")
+                        text = text.replace("ı","")
+
+        # Append line to the list of detected lines
+        found_text_psm7 += text + '\n'
+        results.append(text.rstrip())
+
+        for line in results:
+                print(line + '\n')
+
+
         
 
 
@@ -61,36 +107,8 @@ def preprocess_image(img):
         th, img_bin = cv.threshold(cv.cvtColor(img, cv.COLOR_BGR2GRAY),0,255, cv.THRESH_BINARY + cv.THRESH_OTSU)
         img_bin = cv.merge((img_bin, img_bin, img_bin)) # Hack for 3 gray channels
         # Add binary copy to preprocessed List
-        preprocessed_list[3] = img_bin
-        preprocessed_names_list[3] = "Binary with OTSU"
-        # Apply edge-detection using sobel filter on the grayscale picture
-        scale = 1
-        delta = 0
-        ddepth = cv.CV_16S
-        # Reduce noise using gaussian blur
-        src = cv.GaussianBlur(img, (3, 3), 0)
-        gray = cv.cvtColor(src, cv.COLOR_BGR2GRAY)
-        # gradient in x direction
-        grad_x = cv.Sobel(gray, ddepth, 1, 0, ksize=3, scale=scale, delta=delta, borderType=cv.BORDER_DEFAULT)
-        # gradient in direction 
-        grad_y = cv.Sobel(gray, ddepth, 0, 1, ksize=3, scale=scale, delta=delta, borderType=cv.BORDER_DEFAULT)
-        abs_grad_x = cv.convertScaleAbs(grad_x)
-        abs_grad_y = cv.convertScaleAbs(grad_y)
-        grad = cv.addWeighted(abs_grad_x, 0.5, abs_grad_y, 0.5, 0)
-        grad = cv.merge((grad, grad, grad)) # Hack for 3 gray channels
-        preprocessed_list[4] = grad
-        preprocessed_names_list[4] = "Sobel + Gauss"
-        # Apply edge-detection using laplacian filter on grayscale picture
-        # source : https://docs.opencv.org/3.4/d5/db5/tutorial_laplace_operator.html
-        ddepth = cv.CV_16S
-        kernel_size = 3
-        # the original bgr-picture was already blurred and converted to grayscale for edge-detection with sobel  
-        # we can now apply the laplace function to this picture
-        dst = cv.Laplacian(gray, ddepth, ksize = kernel_size)
-        dst = cv.convertScaleAbs(dst)
-        dst = cv.merge((dst, dst, dst)) # hack for 3 gray channels
-        preprocessed_list[5] = dst
-        preprocessed_names_list[5] = "Laplace + Gauss"
+        preprocessed_list[2] = img_bin
+        preprocessed_names_list[2] = "Binary with OTSU"
         return (preprocessed_list, preprocessed_names_list)
 
 # gets the rotation matrix from the image
@@ -98,7 +116,8 @@ def get_radon_matrix(img):
         radon_preprocess = img.copy()
         I = cv.cvtColor(radon_preprocess, cv.COLOR_BGR2GRAY)
         h, w = I.shape
-        I = I[0:3000, 400:2200] #<- For testin only, manual cropping of image
+        #  fig = plt.figure(figsize=(8,8))
+        # plt.imshow(I)
         # If the resolution is high, resize the image to reduce processing time.
         if (w > 640):
                  I = cv.resize(I, (640, int((h / w) * 640)))
@@ -115,14 +134,12 @@ def get_radon_matrix(img):
 
         # Rotate and save with the original resolution
         M = cv.getRotationMatrix2D((w/2, h/2), 90 - rotation, 1)
-        return M
+        return (M, h, w)
 
 #returns List containing preprocessed and rotated images
-def rotate(preprocessed_list, radon_matrix, h, w):
-        preprocessed_list_rotated = []
-        for idx, image in enumerate(preprocessed_list):
-                preprocessed_list_rotated.append(cv.warpAffine(preprocessed_list[idx], radon_matrix, (w, h)))
-                preprocessed_list[idx] = preprocessed_list_rotated[idx]
+def rotate(preprocessed_list, M, h, w):
+        for idx, _ in enumerate(preprocessed_list):
+                preprocessed_list[idx] = cv.warpAffine(preprocessed_list[idx].copy(), M, (w, h))
         return preprocessed_list
 
 
@@ -154,7 +171,7 @@ def east_detect(preprocessed_list):
 
                 # Load EAST
                 print("[INFO] Initializing text detection with EAST [" + str(index + 1) + "/" + str(len(preprocessed_list)) + "]")
-                net = cv.dnn.readNet('/east/frozen_east_text_detection.pb')
+                net = cv.dnn.readNet(os.getcwd() + '/east/frozen_east_text_detection.pb')
                 net.setPreferableBackend(cv.dnn.DNN_BACKEND_CUDA)
                 net.setPreferableTarget(cv.dnn.DNN_TARGET_CUDA)
 
@@ -225,6 +242,11 @@ def east_detect(preprocessed_list):
                 boxes_list.append(boxes)
         return boxes_list, rW, rH
 
+# Method for getting the center of a bounding box
+def get_center(box):
+        center_x = (box[0] + box[2]) / 2
+        center_y = (box[1] + box[3]) / 2
+        return int(center_x), int(center_y)
 
 # Sort each boxes array
 def sort_boxes(to_sort):
@@ -321,3 +343,36 @@ def connect_boxes(preprocessed_list, boxes_list, img_index, rW, rH):
         # Sort the boxes
         connected_boxes = sort_boxes(connected_boxes)
         return connected_boxes
+
+# Method for preprocessing the image for Tesseract usage
+def preprocess_tsrct(img, scale_percent, blur_amount, bordersize):
+        width = int(img.shape[1] * scale_percent / 100)
+        height = int(img.shape[0] * scale_percent / 100)
+        dim = (width, height)
+    
+        # Resize image
+        resized = cv.resize(img, dim, interpolation = cv.INTER_AREA)
+        gray = cv.cvtColor(resized, cv.COLOR_BGR2GRAY)
+        processed = cv.threshold(gray, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)[1]
+
+        # Make sure that black text is on white background
+        w_pix_num = np.sum(processed == 255)
+        b_pix_num = np.sum(processed == 0)
+        if b_pix_num > w_pix_num:
+                processed = cv.bitwise_not(processed)
+  
+        # Smoothen the background to reduce noise, median blur seems to perform better
+        # processed = cv.GaussianBlur(processed, (blur_amount,blur_amount), 0)
+        processed = cv.medianBlur(processed,blur_amount)
+
+        # Add white border to image
+        processed = cv.copyMakeBorder(
+        processed,
+        top=bordersize,
+        bottom=bordersize,
+        left=bordersize,
+        right=bordersize,
+        borderType=cv.BORDER_CONSTANT,
+        value=[255.0, 255.0, 255.0]) 
+
+        return processed

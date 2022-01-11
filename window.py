@@ -113,7 +113,7 @@ class MainWindow(QMainWindow):
 
     def handleCrop(self):
         self.band = ResizableRubberBand(self.imageLabel)
-        self.band.setGeometry(0, 0, 150, 150)
+        self.band.setGeometry(0, 0, 500, 500)
 
     def handleRun(self):
        print("running analysis") 
@@ -123,6 +123,7 @@ class MainWindow(QMainWindow):
            self.pixmap = QPixmap(openCVtoQImage(cropped)) 
            self.imageLabel.setPixmap(self.pixmap)
            self.imageLabel.adjustSize()
+           runAnalysis(cropped)
 
     def zoomIn(self):   
        if self.scalePercent < 200:
