@@ -37,10 +37,10 @@ def runAnalysis(img):
         M, h, w = get_radon_matrix(img.copy())
         preprocessed_list = rotate(preprocessed_list, M, h, w)
         boxes_list, rW, rH = east_detect(preprocessed_list)
-        img_index = 3 # Set index of image used for text position detection
+        img_index = 2 # Set index of image used for text position detection
         margin = 7 # To account for inaccuracy set amount to increase each boundary by  
         sorted_boxes = sort_boxes(boxes_list[img_index].tolist())
-        connected_boxes = connect_boxes(preprocessed_list. sorted_boxes, img_index, rW, rH)  
+        connected_boxes = connect_boxes(preprocessed_list, sorted_boxes, img_index, rW, rH)  
         tes_preprocess = preprocessed_list[0].copy()
         # Parameters for tesseract preprocessing
         scale_percent = 100 # percent of original size
@@ -60,7 +60,7 @@ def runAnalysis(img):
                         x_end = int(endX * rW)
 
                         cropped_img = tes_preprocess[y_start:y_end, x_start:x_end]
-                        cropped_img = preprocess_tsrct(cropped_img)
+                        cropped_img = preprocess_tsrct(cropped_img, scale_percent, blur_amount, bordersize)
 
                         # Configuration setting for converting image to string
                         configuration = ("-l deu+eng --oem 1 --psm 7")  
@@ -71,16 +71,16 @@ def runAnalysis(img):
                         text = ""
 
                         for index3, word in enumerate(d['text']):
-                                if int(d['conf'][index3]) >= 50:
+                                if int(float(d['conf'][index3])) >= 50:
                                         text = text + word + " "
 
                         # Append detected text to current line of text and clear unwanted symbols
                         text = text.replace("|","")
                         text = text.replace("ı","")
 
-        # Append line to the list of detected lines
-        found_text_psm7 += text + '\n'
-        results.append(text.rstrip())
+                # Append line to the list of detected lines
+                found_text_psm7 += text + '\n'
+                results.append(text.rstrip())
 
         for line in results:
                 print(line + '\n')
@@ -286,15 +286,15 @@ def check_x_intersection(point, range, connect_range):
 
 # Method for calculating the coordinates of a point on the right side of a bounding box
 def get_reach(box):
-        return int(box[2]), int((box[1] + box[3]) / 2)
+        return (int(box[2]), int((box[1] + box[3]) / 2))
 
 def connect_boxes(preprocessed_list, boxes_list, img_index, rW, rH):
         connect_range = 16 # Max distance between boxes that will be connected, must be multiple of 2
         height_correction = 20
         # List containing connected boxes
         connected_boxes = []
-
-        rect_list = boxes_list[img_index].tolist()
+       # rect_list = boxes_list[img_index].tolist()
+        rect_list = boxes_list[img_index]
         rect_list = sorted(rect_list, key=lambda k: [k[0], k[1]])
 
 
@@ -311,21 +311,21 @@ def connect_boxes(preprocessed_list, boxes_list, img_index, rW, rH):
 
                 boxes_to_remove = [curr_rect]
 
-        for rect in rect_list:
-                if check_x_intersection(rect_reach[0], range(rect[0], rect[2])) and rect_reach[1] in range(rect[1], rect[3]) and curr_y2-curr_y1-height_correction <= rect[3]-rect[1]:
-                        curr_x2 = rect[2]
+                for rect in rect_list:
+                        if check_x_intersection(rect_reach[0], range(rect[0], rect[2]), connect_range) and rect_reach[1] in range(rect[1], rect[3]) and curr_y2-curr_y1-height_correction <= rect[3]-rect[1]:
+                                curr_x2 = rect[2]
       
-                        if rect[1] < curr_y1:
-                                curr_y1 = rect[1]
+                                if rect[1] < curr_y1:
+                                        curr_y1 = rect[1]
       
-                        if rect[3] > curr_y2:
-                                curr_y2 = rect[3]
+                                if rect[3] > curr_y2:
+                                        curr_y2 = rect[3]
       
-                        rect_reach = get_reach(rect)
-                        boxes_to_remove.append(rect)
+                                rect_reach = get_reach(rect)
+                                boxes_to_remove.append(rect)
 
-                connected_boxes.append([curr_x1, curr_y1, curr_x2, curr_y2])
-                rect_list = [i for i in rect_list if i not in boxes_to_remove] 
+                        connected_boxes.append([curr_x1, curr_y1, curr_x2, curr_y2])
+                        rect_list = [i for i in rect_list if i not in boxes_to_remove] 
 
         # Draw the expanded boxes on this image
         orig_connected_rectangles = preprocessed_list[img_index].copy()
