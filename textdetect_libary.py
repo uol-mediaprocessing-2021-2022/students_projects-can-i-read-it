@@ -81,9 +81,10 @@ def runAnalysis(img):
                 # Append line to the list of detected lines
                 found_text_psm7 += text + '\n'
                 results.append(text.rstrip())
-
+        print("hi" + '\n')
         for line in results:
                 print(line + '\n')
+        print('bye')
 
 
         
@@ -327,20 +328,6 @@ def connect_boxes(preprocessed_list, boxes_list, img_index, rW, rH):
                         connected_boxes.append([curr_x1, curr_y1, curr_x2, curr_y2])
                         rect_list = [i for i in rect_list if i not in boxes_to_remove] 
 
-        # Draw the expanded boxes on this image
-        orig_connected_rectangles = preprocessed_list[img_index].copy()
-
-        # Iterate all boxes of an image
-        for (startX, startY, endX, endY) in connected_boxes:
-                # Rescale the boxes
-                startX = int(startX * rW)
-                startY = int(startY * rH)
-                endX = int(endX * rW)
-                endY = int(endY * rH)
-                # Draw boxes in output image
-                cv.rectangle(orig_connected_rectangles, (startX, startY), (endX, endY), (0, 255, 0), 3)
-
-        # Sort the boxes
         connected_boxes = sort_boxes(connected_boxes)
         return connected_boxes
 
