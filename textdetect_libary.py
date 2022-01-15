@@ -1,4 +1,4 @@
-import os 
+import os
 import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
@@ -38,8 +38,8 @@ def runAnalysis(img):
         preprocessed_list = rotate(preprocessed_list, M, h, w)
         boxes_list, rW, rH = east_detect(preprocessed_list)
         img_index = 2 # Set index of image used for text position detection
-        sorted_boxes = sort_boxes(boxes_list[img_index].tolist())
-        connected_boxes = connect_boxes(sorted_boxes, img_index, rW, rH)
+        # sorted_boxes = sort_boxes(boxes_list[img_index].tolist())   ---> sort_boxes method is never used in the actual app (Only useful in Notebook)
+        connected_boxes = connect_boxes(boxes_list, img_index)
         tes_preprocess = img.copy()
         # Parameters for tesseract preprocessing
         scale_percent = 100 # percent of original size
@@ -277,15 +277,14 @@ def check_x_intersection(point, range):
 
 # Method for calculating the coordinates of a point on the right side of a bounding box
 def get_reach(box):
-        return (int(box[2]), int((box[1] + box[3]) / 2))
+        return int(box[2]), int((box[1] + box[3]) / 2)
 
-def connect_boxes(boxes_list, img_index, rW, rH):
+def connect_boxes(boxes_list, img_index):
         connect_range = 16 # Max distance between boxes that will be connected, must be multiple of 2
         height_correction = 20
         # List containing connected boxes
         connected_boxes = []
-       # rect_list = boxes_list[img_index].tolist()
-        rect_list = boxes_list[0]
+        rect_list = boxes_list[img_index].tolist()
         rect_list = sorted(rect_list, key=lambda k: [k[0], k[1]])
 
 
