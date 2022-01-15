@@ -39,8 +39,8 @@ def runAnalysis(img):
         boxes_list, rW, rH = east_detect(preprocessed_list)
         img_index = 2 # Set index of image used for text position detection
         sorted_boxes = sort_boxes(boxes_list[img_index].tolist())
-        connected_boxes = connect_boxes(sorted_boxes, img_index, rW, rH)  
-        tes_preprocess = preprocessed_list[0].copy()
+        connected_boxes = connect_boxes(sorted_boxes, img_index, rW, rH)
+        tes_preprocess = img.copy()
         # Parameters for tesseract preprocessing
         scale_percent = 100 # percent of original size
         blur_amount = 3 # how much blur to apply
@@ -82,12 +82,7 @@ def runAnalysis(img):
         for line in results:
                 print(line + '\n')
 
-
-        
-
-
-def preprocess_image(img):
-        # Create a list to store all preprocessed versions
+def preprocess_image(img): # Create a list to store all preprocessed versions
         preprocessed_list = {}
         # create a list that stores strings describing all preprocessed versions
         preprocessed_names_list = {}
@@ -232,8 +227,6 @@ def east_detect(preprocessed_list):
                         startY = int(startY * rH)
                         endX = int(endX * rW)
                         endY = int(endY * rH)
-                        # Draw boxes in output image
-                        cv.rectangle(orig_rectangles, (startX, startY), (endX, endY), (0, 255, 0), 3)
 
                 # Add boxes to list containing all boxes for an image
                 boxes_list.append(boxes)
@@ -273,13 +266,14 @@ def sort_boxes(to_sort):
         return sorted_boxes_tmp
 
 # Method for checking whether a point is in a bounding box
-def check_x_intersection(point, range, connect_range):
+def check_x_intersection(point, range):
+        connect_range = 16
         i = 0
         while i <= connect_range:
                 if point+i in range:
                         return True
                 i = i + 2
-                return False
+        return False
 
 # Method for calculating the coordinates of a point on the right side of a bounding box
 def get_reach(box):
@@ -309,7 +303,7 @@ def connect_boxes(boxes_list, img_index, rW, rH):
                 boxes_to_remove = [curr_rect]
 
                 for rect in rect_list:
-                        if check_x_intersection(rect_reach[0], range(rect[0], rect[2]), connect_range) and rect_reach[1] in range(rect[1], rect[3]) and curr_y2-curr_y1-height_correction <= rect[3]-rect[1]:
+                        if check_x_intersection(rect_reach[0], range(rect[0], rect[2])) and rect_reach[1] in range(rect[1], rect[3]) and curr_y2-curr_y1-height_correction <= rect[3]-rect[1]:
                                 curr_x2 = rect[2]
       
                                 if rect[1] < curr_y1:
