@@ -113,13 +113,13 @@ class MainWindow(QMainWindow):
 
     def handleCrop(self):
         self.band = ResizableRubberBand(self.imageLabel)
-        self.band.setGeometry(0, 0, 500, 500)
+        self.band.setGeometry(0, 0, int(500 * self.scalePercent / 100), int(500 * self.scalePercent / 100))
 
     def handleRun(self):
        print("running analysis") 
        if self.band:
-           x1, y1, x2, y2 = self.band.geometry().getCoords()
-           cropped = cropImage(self.cvOrig.copy(), y1, x1, y2, x2, self.scalePercent)
+           x, y, w, h = self.band.geometry().getCoords()
+           cropped = cropImage(self.cvOrig.copy(), x, y, w, h, self.scalePercent)
            self.pixmap = QPixmap(openCVtoQImage(cropped)) 
            self.imageLabel.setPixmap(self.pixmap)
            self.imageLabel.adjustSize()

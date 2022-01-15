@@ -23,11 +23,11 @@ def scaleImage(cvImg, scalePercent, h, w):
         pixmap = pixmap.scaled(int(h * (scalePercent / 100)), int(w * (scalePercent / 100)), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
         return pixmap
 
-def cropImage(cvImg, y1, x1, y2, x2, scalePercent):
+def cropImage(cvImg, x, y, w, h, scalePercent):
         img = cvImg.copy()
-        dim = (int(np.ceil(img.shape[1] * scalePercent / 100)), int(np.ceil(img.shape[0] * scalePercent / 100)))
+        dim = (int(img.shape[1] * scalePercent / 100), int(img.shape[0] * scalePercent / 100))
         img = cv.resize(img, dim, interpolation=cv.INTER_LINEAR_EXACT)
-        cropped = img[y1 : y2, x1 : x2].copy()
+        cropped = img[y : y + h, x : x + w].copy()
         return cropped
 
 def runAnalysis(img):
@@ -38,9 +38,8 @@ def runAnalysis(img):
         preprocessed_list = rotate(preprocessed_list, M, h, w)
         boxes_list, rW, rH = east_detect(preprocessed_list)
         img_index = 2 # Set index of image used for text position detection
-        margin = 7 # To account for inaccuracy set amount to increase each boundary by  
         sorted_boxes = sort_boxes(boxes_list[img_index].tolist())
-        connected_boxes = connect_boxes(preprocessed_list, sorted_boxes, img_index, rW, rH)  
+        connected_boxes = connect_boxes(sorted_boxes, img_index, rW, rH)  
         tes_preprocess = preprocessed_list[0].copy()
         # Parameters for tesseract preprocessing
         scale_percent = 100 # percent of original size
@@ -50,7 +49,6 @@ def runAnalysis(img):
         found_text_psm7 = ""
 
         for index, elem in enumerate(connected_boxes):
-                curr_row = ""
                 for index2, (startX, startY, endX, endY) in enumerate(elem):
     
                         # Calculate adjusted margins 
@@ -81,10 +79,8 @@ def runAnalysis(img):
                 # Append line to the list of detected lines
                 found_text_psm7 += text + '\n'
                 results.append(text.rstrip())
-        print("hi" + '\n')
         for line in results:
                 print(line + '\n')
-        print('bye')
 
 
         
@@ -289,13 +285,13 @@ def check_x_intersection(point, range, connect_range):
 def get_reach(box):
         return (int(box[2]), int((box[1] + box[3]) / 2))
 
-def connect_boxes(preprocessed_list, boxes_list, img_index, rW, rH):
+def connect_boxes(boxes_list, img_index, rW, rH):
         connect_range = 16 # Max distance between boxes that will be connected, must be multiple of 2
         height_correction = 20
         # List containing connected boxes
         connected_boxes = []
        # rect_list = boxes_list[img_index].tolist()
-        rect_list = boxes_list[img_index]
+        rect_list = boxes_list[0]
         rect_list = sorted(rect_list, key=lambda k: [k[0], k[1]])
 
 
