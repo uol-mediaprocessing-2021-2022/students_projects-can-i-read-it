@@ -1,3 +1,4 @@
+from asyncio import create_subprocess_exec
 import os
 import cv2 as cv
 import numpy as np
@@ -314,10 +315,9 @@ def connect_boxes(boxes_list, img_index):
                                 rect_reach = get_reach(rect)
                                 boxes_to_remove.append(rect)
 
-                        connected_boxes.append([curr_x1, curr_y1, curr_x2, curr_y2])
-                        rect_list = [i for i in rect_list if i not in boxes_to_remove] 
-
-        connected_boxes = sort_boxes(connected_boxes)
+                connected_boxes.append([curr_x1, curr_y1, curr_x2, curr_y2])
+                rect_list = [i for i in rect_list if i not in boxes_to_remove] 
+        connected_boxes = sort_boxes(connected_boxes)        
         return connected_boxes
 
 # Method for preprocessing the image for Tesseract usage
@@ -343,12 +343,12 @@ def preprocess_tsrct(img, scale_percent, blur_amount, bordersize):
 
         # Add white border to image
         processed = cv.copyMakeBorder(
-        processed,
-        top=bordersize,
-        bottom=bordersize,
-        left=bordersize,
-        right=bordersize,
-        borderType=cv.BORDER_CONSTANT,
-        value=[255.0, 255.0, 255.0]) 
+                processed,
+                top=bordersize,
+                bottom=bordersize,
+                left=bordersize,
+                right=bordersize,
+                borderType=cv.BORDER_CONSTANT,
+                value=[255.0, 255.0, 255.0]) 
 
         return processed
