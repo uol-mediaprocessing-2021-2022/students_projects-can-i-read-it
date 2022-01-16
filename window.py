@@ -1,9 +1,11 @@
+from sqlite3 import paramstyle
 import sys
 import cv2 as cv
 from PyQt5.QtWidgets import QLabel, QMainWindow, QApplication,  QPushButton, QFileDialog, QWidget, QHBoxLayout,  QSizeGrip, QRubberBand
 from PyQt5.QtGui import QPixmap, QImage, QPainter
 from PyQt5 import uic, QtCore
-from textdetect_libary import *
+from textdetect_library import *
+from Textdetect import textdetect
 
 class ResizableRubberBand(QWidget):
     def __init__(self, parent=None):
@@ -71,15 +73,20 @@ class ResizableRubberBand(QWidget):
         
 
 class MainWindow(QMainWindow):
+
+    cropped = None
+
     def __init__(self):
         super(MainWindow, self).__init__()
-        self.initUI() 
+        self.initUI()
+        self.textdetection = textdetect(None)
+        self.textdetection.getPath()
 
     def initUI(self):
-        # load ui file
+        # Load ui file
         uic.loadUi("window.ui", self)
 
-        # define widgets
+        # Define widgets
         self.openButton = self.findChild(QPushButton, "openButton")
         self.runButton = self.findChild(QPushButton, "runButton")
         self.cropButton = self.findChild(QPushButton, "cropButton")
@@ -89,15 +96,23 @@ class MainWindow(QMainWindow):
 
         self.openButton.clicked.connect(self.handleOpen)
         self.cropButton.clicked.connect(self.handleCrop)
+        self.cropButton.setCheckable(True)
+
+        # Styles
+        self.cropButton.setStyleSheet("background-color : lightgrey")
+
         self.runButton.clicked.connect(self.handleRun)
         self.zoomInButton.clicked.connect(self.zoomIn)
         self.zoomOutButton.clicked.connect(self.zoomOut)
-        # display app
+        # Display app
         self.show()
 
+    # TEMP PARAM FOR TESTING
+    param = {
+        "preprocess_method" : 3,
+        "enable_radon" : True
+    }
     
-
-
     def handleOpen(self):
         # open file dialog and load path of image
         image_path = QFileDialog.getOpenFileName(self, "Open Picture", "", "PNG Files (*.png);;JPG Files (*.jpg)")
@@ -110,20 +125,27 @@ class MainWindow(QMainWindow):
             self.pixmap = QPixmap(openCVtoQImage(self.cvOrig))
             self.imageLabel.setPixmap(self.pixmap)
             self.imageLabel.adjustSize()
+            self.textdetection.set_image(self.cvOrig) 
 
     def handleCrop(self):
-        self.band = ResizableRubberBand(self.imageLabel)
-        self.band.setGeometry(0, 0, int(500 * self.scalePercent / 100), int(500 * self.scalePercent / 100))
+        if self.cropButton.isChecked():
+            self.band = ResizableRubberBand(self.imageLabel)
+            self.band.setGeometry(0, 0, int(500 * self.scalePercent / 100), int(500 * self.scalePercent / 100))
+            # set background color back to light-grey
+            self.cropButton.setStyleSheet("background-color : lightgrey")
+        else:
+            x, y, w, h = self.band.geometry().getCoords()
+            self.cropped = cropImage(self.cvOrig.copy(), x, y, w, h, self.scalePercent)
+            self.textdetection.set_image(self.cropped)
+            self.pixmap = QPixmap(openCVtoQImage(self.cropped)) 
+            self.imageLabel.setPixmap(self.pixmap)
+            self.imageLabel.adjustSize()
+            # setting background color to light-blue
+            self.cropButton.setStyleSheet("background-color : lightblue")
 
     def handleRun(self):
-       print("running analysis") 
-       if self.band:
-           x, y, w, h = self.band.geometry().getCoords()
-           cropped = cropImage(self.cvOrig.copy(), x, y, w, h, self.scalePercent)
-           self.pixmap = QPixmap(openCVtoQImage(cropped)) 
-           self.imageLabel.setPixmap(self.pixmap)
-           self.imageLabel.adjustSize()
-           runAnalysis(cropped)
+        print("Running analysis") 
+        self.textdetection.runAnalysis(self.param)
 
     def zoomIn(self):   
        if self.scalePercent < 200:
@@ -139,10 +161,7 @@ class MainWindow(QMainWindow):
             self.imageLabel.adjustSize()
  
 
-
 # initialize app
-
 app = QApplication(sys.argv)
 UIWindow = MainWindow()
 app.exec_()
-
