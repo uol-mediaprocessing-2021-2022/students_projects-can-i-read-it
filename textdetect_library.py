@@ -14,9 +14,9 @@ def scaleImage(cvImg, scalePercent, h, w):
         pixmap = pixmap.scaled(int(h * (scalePercent / 100)), int(w * (scalePercent / 100)), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
         return pixmap
 
-def cropImage(cvImg, x, y, w, h, scalePercent):
+def cropImage(cvImg, x1, x2, y1, y2):
         img = cvImg.copy()
-        dim = (int(img.shape[1] * scalePercent / 100), int(img.shape[0] * scalePercent / 100))
-        img = cv.resize(img, dim, interpolation=cv.INTER_LINEAR_EXACT)
-        cropped = img[y : y + h, x : x + w].copy()
+        dim = (int(img.shape[1]), int(img.shape[0]))
+        # img = cv.resize(img, dim, interpolation=cv.INTER_LINEAR_EXACT)
+        cropped = img[int(dim[1]*y1):int(dim[1]*y2), int(dim[0]*x1):int(dim[0]*x2)].copy()
         return cropped

@@ -43,30 +43,17 @@
      <string>Detect Text</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="zoomInButton">
+   <widget class="QPushButton" name="resetCropButton">
     <property name="geometry">
      <rect>
       <x>430</x>
-      <y>820</y>
+      <y>830</y>
       <width>81</width>
-      <height>26</height>
+      <height>31</height>
      </rect>
     </property>
     <property name="text">
-     <string>+</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="zoomOutButton">
-    <property name="geometry">
-     <rect>
-      <x>430</x>
-      <y>850</y>
-      <width>81</width>
-      <height>26</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>-</string>
+     <string>Reset crop</string>
     </property>
    </widget>
    <widget class="QLabel" name="imageLabel">

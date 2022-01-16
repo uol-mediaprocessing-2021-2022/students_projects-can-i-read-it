@@ -70,6 +70,7 @@ class ResizableRubberBand(QWidget):
                     event.ignore()
                 self.mousePressPos = None
         super(ResizableRubberBand, self).mouseReleaseEvent(event)
+
         
 
 class MainWindow(QMainWindow):
@@ -90,8 +91,8 @@ class MainWindow(QMainWindow):
         self.openButton = self.findChild(QPushButton, "openButton")
         self.runButton = self.findChild(QPushButton, "runButton")
         self.cropButton = self.findChild(QPushButton, "cropButton")
-        self.zoomInButton = self.findChild(QPushButton, "zoomInButton")
-        self.zoomOutButton = self.findChild(QPushButton, "zoomOutButton")
+        self.resetCropButton = self.findChild(QPushButton, "resetCropButton")
+        # self.zoomOutButton = self.findChild(QPushButton, "zoomOutButton")
         self.imageLabel = self.findChild(QLabel, "imageLabel")
 
         self.openButton.clicked.connect(self.handleOpen)
@@ -102,8 +103,8 @@ class MainWindow(QMainWindow):
         self.cropButton.setStyleSheet("background-color : lightgrey")
 
         self.runButton.clicked.connect(self.handleRun)
-        self.zoomInButton.clicked.connect(self.zoomIn)
-        self.zoomOutButton.clicked.connect(self.zoomOut)
+        self.resetCropButton.clicked.connect(self.resetCrop)
+        # self.zoomOutButton.clicked.connect(self.zoomOut)
         # Display app
         self.show()
 
@@ -121,8 +122,13 @@ class MainWindow(QMainWindow):
         if image_path:
             self.cvOrig = cv.cvtColor(cv.imread(image_path[0]), cv.COLOR_BGR2RGB)
             self.h, self.w = self.cvOrig.shape[:2]
-            self.scalePercent = 100
+
             self.pixmap = QPixmap(openCVtoQImage(self.cvOrig))
+            self.pixmap = self.pixmap.scaled(800, 800, QtCore.Qt.KeepAspectRatio)
+ 
+            self.bR_x = self.pixmap.rect().bottomRight().x()
+            self.bR_y = self.pixmap.rect().bottomRight().y()
+
             self.imageLabel.setPixmap(self.pixmap)
             self.imageLabel.adjustSize()
             self.textdetection.set_image(self.cvOrig) 
@@ -130,14 +136,25 @@ class MainWindow(QMainWindow):
     def handleCrop(self):
         if self.cropButton.isChecked():
             self.band = ResizableRubberBand(self.imageLabel)
-            self.band.setGeometry(0, 0, int(500 * self.scalePercent / 100), int(500 * self.scalePercent / 100))
+            self.band.setGeometry(0, 0, 500, 500)
             # set background color back to light-grey
             self.cropButton.setStyleSheet("background-color : lightgrey")
         else:
             x, y, w, h = self.band.geometry().getCoords()
-            self.cropped = cropImage(self.cvOrig.copy(), x, y, w, h, self.scalePercent)
+
+            x1 = x / self.bR_x
+            x2 = w / self.bR_x
+            y1 = y / self.bR_y
+            y2 = h / self.bR_y
+
+            self.cropped = cropImage(self.cvOrig.copy(), x1, x2, y1, y2)
             self.textdetection.set_image(self.cropped)
-            self.pixmap = QPixmap(openCVtoQImage(self.cropped)) 
+            self.pixmap = QPixmap(openCVtoQImage(self.cropped))
+            self.pixmap = self.pixmap.scaled(800, 800, QtCore.Qt.KeepAspectRatio)
+
+            # Close the RubberBand
+            self.band.close()
+
             self.imageLabel.setPixmap(self.pixmap)
             self.imageLabel.adjustSize()
             # setting background color to light-blue
@@ -147,18 +164,17 @@ class MainWindow(QMainWindow):
         print("Running analysis") 
         self.textdetection.runAnalysis(self.param)
 
-    def zoomIn(self):   
-       if self.scalePercent < 200:
-            self.scalePercent += 10 
-            self.imageLabel.setPixmap(scaleImage(self.cvOrig.copy(), self.scalePercent, self.h, self.w))
-            self.imageLabel.adjustSize()
+    def resetCrop(self):   
+        self.pixmap = QPixmap(openCVtoQImage(self.cvOrig))
+        self.pixmap = self.pixmap.scaled(800, 800, QtCore.Qt.KeepAspectRatio)
+        self.imageLabel.setPixmap(self.pixmap)
+        self.imageLabel.adjustSize()
         
-        
-    def zoomOut(self):
-        if self.scalePercent > 10:
-            self.scalePercent -= 10 
-            self.imageLabel.setPixmap(scaleImage(self.cvOrig, self.scalePercent, self.h, self.w))
-            self.imageLabel.adjustSize()
+    # def zoomOut(self):
+    #     if self.scalePercent > 10:
+    #         self.scalePercent -= 10 
+    #         self.imageLabel.setPixmap(scaleImage(self.cvOrig, self.scalePercent, self.h, self.w))
+    #         self.imageLabel.adjustSize()
  
 
 # initialize app

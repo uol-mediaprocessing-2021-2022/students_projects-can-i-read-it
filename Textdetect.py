@@ -266,8 +266,9 @@ class textdetect:
 
         # Connect and sort text boxes
         def sort_and_connect(self):
-                connect_range = 16 # Max distance between boxes that will be connected, must be multiple of 2
-                height_correction = 20 # Variable that prevents vertically larger boxes from connecting with smaller boxes
+                # TODO Add theese changes to notebook = connect range scaling
+                connect_range = 200 # Max distance between boxes that will be connected, must be multiple of 2
+                height_correction = 0.85 # Variable that prevents vertically larger boxes from connecting with smaller boxes
 
                 # List containing connected boxes
                 connected_boxes = []
@@ -288,7 +289,7 @@ class textdetect:
                         boxes_to_remove = [curr_rect]
 
                         for rect in rect_list:
-                                if self.check_x_intersection(rect_reach[0], range(rect[0], rect[2]), connect_range) and rect_reach[1] in range(rect[1], rect[3]) and curr_y2-curr_y1-height_correction <= rect[3]-rect[1]:
+                                if self.check_x_intersection(rect_reach[0], range(rect[0], rect[2]), connect_range) and rect_reach[1] in range(rect[1], rect[3]) and abs(1 - abs((curr_y2-curr_y1) / (rect[3]-rect[1]))) <= height_correction:
                                         curr_x2 = rect[2]
                 
                                         if rect[1] < curr_y1:
@@ -319,6 +320,8 @@ class textdetect:
              
                 # TODO Display the image with boxes for interactivity
                 # imshow(...)
+                plt.imshow(orig_connected_rectangles)
+                plt.show()
 
                 # Sort the boxes
                 self.boxes_list = self.sort_boxes(connected_boxes)
@@ -327,7 +330,7 @@ class textdetect:
         def preprocess_tsrct(self, imge, scale_percent, bordersize, blur_amount):
                 width = int(imge.shape[1] * scale_percent / 100)
                 height = int(imge.shape[0] * scale_percent / 100)
-                dim = (width, height)
+                dim = (width, height) # TODO WHy can this be 0 ???
                 
                 # Resize image
                 resized = cv.resize(imge, dim, interpolation = cv.INTER_AREA)
