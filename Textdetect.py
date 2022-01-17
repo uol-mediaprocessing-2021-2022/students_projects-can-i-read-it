@@ -22,7 +22,7 @@ class textdetect:
         rH = None
 
         def __init__(self, img): 
-                self.img = img   # TEST THE OUTPUT !!! IMSHOW? 
+                self.img = img  
 
         def getPath(self):
                 widget = QWidget()
@@ -105,7 +105,6 @@ class textdetect:
                 radon_preprocess = self.img.copy()
                 I = cv.cvtColor(radon_preprocess, cv.COLOR_BGR2GRAY)
                 h, w = I.shape
-                #I = I[0:3000, 400:2200] #<- Don't need this, we assume the image was already cropped by an user
 
                 # If the resolution is high, resize the image to reduce processing time.
                 if (w > 640):
@@ -323,7 +322,6 @@ class textdetect:
 
              
                 # TODO Display the image with boxes for interactivity
-                # imshow(...)
                 plt.imshow(orig_connected_rectangles)
                 plt.show()
 
@@ -364,17 +362,14 @@ class textdetect:
 
                 return processed
 
-        def extract_text(self):
+        def extract_text(self, parameters):
                 tes_preprocess = self.img.copy()
-                
-                # DEBUG
-                # plt.imshow(tes_preprocess)
-                # plt.show()
 
                 # Parameters
-                scale_percent = 100 # percent of original size
-                bordersize = 10 # size of border to add
-                blur_amount = 3 # how much blur to apply
+                scale_percent = int(parameters["scaling"]) # percent of original size
+                blur_amount = int(parameters["blur"]) # how much blur to apply
+                bordersize = int(parameters["border"]) # size of border to add
+                minConf = int(parameters["minConf"]) # minimum confidence when detecting a word
 
                 results = []
                 found_text_psm7 = ""
@@ -401,7 +396,7 @@ class textdetect:
                                 text = ""
 
                                 for index3, word in enumerate(d['text']):
-                                        if float(d['conf'][index3]) >= 50:
+                                        if float(d['conf'][index3]) >= minConf:
                                                 text = text + word + " "
 
                                 # Append detected text to current line of text and clear unwanted symbols
@@ -440,7 +435,7 @@ class textdetect:
                 found_boxes = self.sort_and_connect()
 
                 if found_boxes != 0:
-                        detected_text = self.extract_text()
+                        detected_text = self.extract_text(parameters)
                 else:
                         detected_text = "No text has been detected." 
                 print(detected_text)

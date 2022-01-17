@@ -73,7 +73,6 @@
     </property>
     <property name="font">
      <font>
-      <family>Calibri</family>
       <pointsize>12</pointsize>
      </font>
     </property>
@@ -98,7 +97,6 @@
     </property>
     <property name="font">
      <font>
-      <family>Calibri</family>
       <pointsize>11</pointsize>
      </font>
     </property>
@@ -167,7 +165,7 @@
      <bool>true</bool>
     </property>
    </widget>
-   <widget class="QLabel" name="label">
+   <widget class="QLabel" name="preprocessLabel">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -180,6 +178,170 @@
      <string>Set preprocessing method</string>
     </property>
    </widget>
+   <widget class="QLabel" name="ocrLabel">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>870</y>
+      <width>191</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Set OCR mode</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="ocrBox">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>890</y>
+      <width>221</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="editable">
+     <bool>false</bool>
+    </property>
+    <property name="currentText">
+     <string/>
+    </property>
+    <property name="currentIndex">
+     <number>-1</number>
+    </property>
+    <property name="placeholderText">
+     <string>Set OCR mode</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="scalingEdit">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>970</y>
+      <width>31</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>100</string>
+    </property>
+    <property name="placeholderText">
+     <string>100</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="tsrctLabel">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>970</y>
+      <width>61</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Set scaling:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="tsrctSettingsLabel">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>950</y>
+      <width>161</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Tesseract preprocess settings:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="tsrctLabel_2">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>1000</y>
+      <width>71</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Blur amount:</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="blurEdit">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>1000</y>
+      <width>21</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>3</string>
+    </property>
+    <property name="placeholderText">
+     <string>3</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="tsrctLabel_3">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>1030</y>
+      <width>71</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Border size:</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="borderEdit">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>1030</y>
+      <width>21</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>10</string>
+    </property>
+    <property name="placeholderText">
+     <string>10</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="tsrctLabel_4">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>1060</y>
+      <width>91</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Min. confidence:</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="confEdit">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>1060</y>
+      <width>21</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>50</string>
+    </property>
+    <property name="placeholderText">
+     <string>50</string>
+    </property>
+   </widget>
    <zorder>background1</zorder>
    <zorder>openButton</zorder>
    <zorder>runButton</zorder>
@@ -189,7 +351,18 @@
    <zorder>cropButton</zorder>
    <zorder>preprocessingBox</zorder>
    <zorder>radonCheck</zorder>
-   <zorder>label</zorder>
+   <zorder>preprocessLabel</zorder>
+   <zorder>ocrLabel</zorder>
+   <zorder>ocrBox</zorder>
+   <zorder>scalingEdit</zorder>
+   <zorder>tsrctLabel</zorder>
+   <zorder>tsrctSettingsLabel</zorder>
+   <zorder>tsrctLabel_2</zorder>
+   <zorder>blurEdit</zorder>
+   <zorder>tsrctLabel_3</zorder>
+   <zorder>borderEdit</zorder>
+   <zorder>tsrctLabel_4</zorder>
+   <zorder>confEdit</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
