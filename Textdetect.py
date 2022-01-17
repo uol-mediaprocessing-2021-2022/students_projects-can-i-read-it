@@ -56,7 +56,7 @@ class textdetect:
                 alpha = 2 # Contrast
                 beta = 0 # Brightness
 
-                self.greyscale(self.img)
+                self.greyscale()
                 self.preprocessed_image = cv.convertScaleAbs(self.preprocessed_image, alpha=alpha, beta=beta)
         
         # Create a binary copy using "smart" thresholding, also apply Gaussian blur for noise reduction
@@ -120,7 +120,7 @@ class textdetect:
                 # text and white lines
                 r = np.array([np.sqrt(np.mean(np.abs(line) ** 2)) for line in sinogram.transpose()])
                 rotation = np.argmax(r)
-                print('Rotation: {:.2f} degrees'.format(90 - rotation))
+                print('[INFO] ' + 'Rotation: {:.2f} degrees'.format(90 - rotation))
 
                 # Rotate and save with the original resolution
                 M = cv.getRotationMatrix2D((w/2, h/2), 90 - rotation, 1)
@@ -167,7 +167,7 @@ class textdetect:
                 (scores, geometry) = net.forward(layerNames)
                 end = time.time()
 
-                print("[INFO] text detection took {:.6f} seconds".format(end - start))
+                print("[INFO] EAST text detection took {:.6f} seconds".format(end - start))
         
                 # Grab the number of rows and columns from the scores volume, then
                 # initialize our set of bounding box rectangles and corresponding
@@ -272,6 +272,10 @@ class textdetect:
 
                 # List containing connected boxes
                 connected_boxes = []
+
+                # Check if any text was found
+                if len(self.boxes_list) == 0:
+                        return 0
 
                 rect_list = self.boxes_list.tolist()
                 rect_list = sorted(rect_list, key=lambda k: [k[0], k[1]])
@@ -408,8 +412,12 @@ class textdetect:
                         found_text_psm7 += text + '\n'
                         results.append(text.rstrip())
 
+                detected_text = ""
                 for line in results:
-                        print(line + '\n')
+                        detected_text = detected_text + line + '\n'
+
+                return detected_text
+                
 
         def runAnalysis(self, parameters): # TODO Create parameters in window py, take other params into account
                 match parameters["preprocess_method"]:
@@ -427,6 +435,13 @@ class textdetect:
                 if parameters["enable_radon"] == True:
                         self.use_radon_rotation()
                 
+                detected_text = ""
                 self.east_detect()
-                self.sort_and_connect()
-                self.extract_text()
+                found_boxes = self.sort_and_connect()
+
+                if found_boxes != 0:
+                        detected_text = self.extract_text()
+                else:
+                        detected_text = "No text has been detected." 
+                print(detected_text)
+                return detected_text

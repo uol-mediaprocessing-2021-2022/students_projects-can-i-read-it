@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1000</width>
-    <height>1000</height>
+    <width>990</width>
+    <height>1209</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,8 +21,8 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>830</y>
-      <width>391</width>
+      <y>820</y>
+      <width>71</width>
       <height>31</height>
      </rect>
     </property>
@@ -34,8 +34,8 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>880</y>
-      <width>391</width>
+      <y>780</y>
+      <width>251</width>
       <height>31</height>
      </rect>
     </property>
@@ -46,8 +46,8 @@
    <widget class="QPushButton" name="resetCropButton">
     <property name="geometry">
      <rect>
-      <x>430</x>
-      <y>830</y>
+      <x>190</x>
+      <y>820</y>
       <width>81</width>
       <height>31</height>
      </rect>
@@ -59,17 +59,23 @@
    <widget class="QLabel" name="imageLabel">
     <property name="geometry">
      <rect>
-      <x>0</x>
-      <y>0</y>
-      <width>800</width>
-      <height>800</height>
+      <x>20</x>
+      <y>10</y>
+      <width>951</width>
+      <height>751</height>
      </rect>
     </property>
     <property name="maximumSize">
      <size>
-      <width>800</width>
-      <height>800</height>
+      <width>1200</width>
+      <height>1200</height>
      </size>
+    </property>
+    <property name="font">
+     <font>
+      <family>Calibri</family>
+      <pointsize>12</pointsize>
+     </font>
     </property>
     <property name="text">
      <string/>
@@ -78,30 +84,120 @@
      <bool>false</bool>
     </property>
     <property name="alignment">
-     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QTextBrowser" name="textWindow">
+    <property name="geometry">
+     <rect>
+      <x>530</x>
+      <y>780</y>
+      <width>451</width>
+      <height>361</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Calibri</family>
+      <pointsize>11</pointsize>
+     </font>
     </property>
    </widget>
    <widget class="QPushButton" name="cropButton">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>860</y>
-      <width>391</width>
-      <height>26</height>
+      <x>100</x>
+      <y>820</y>
+      <width>81</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="text">
-     <string>Crop Image</string>
+     <string>Crop image</string>
     </property>
    </widget>
+   <widget class="QLabel" name="background1">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>770</y>
+      <width>991</width>
+      <height>421</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="preprocessingBox">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>890</y>
+      <width>251</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="editable">
+     <bool>false</bool>
+    </property>
+    <property name="currentText">
+     <string/>
+    </property>
+    <property name="currentIndex">
+     <number>-1</number>
+    </property>
+    <property name="placeholderText">
+     <string>Set preprocessing method</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="radonCheck">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>920</y>
+      <width>251</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Use radon transform (cropping required)</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>870</y>
+      <width>191</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Set preprocessing method</string>
+    </property>
+   </widget>
+   <zorder>background1</zorder>
+   <zorder>openButton</zorder>
+   <zorder>runButton</zorder>
+   <zorder>resetCropButton</zorder>
+   <zorder>imageLabel</zorder>
+   <zorder>textWindow</zorder>
+   <zorder>cropButton</zorder>
+   <zorder>preprocessingBox</zorder>
+   <zorder>radonCheck</zorder>
+   <zorder>label</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1000</width>
-     <height>13</height>
+     <width>990</width>
+     <height>22</height>
     </rect>
    </property>
   </widget>

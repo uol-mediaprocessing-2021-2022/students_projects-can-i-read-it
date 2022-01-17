@@ -1,12 +1,130 @@
 from sqlite3 import paramstyle
 import sys
 import cv2 as cv
-from PyQt5.QtWidgets import QLabel, QMainWindow, QApplication,  QPushButton, QFileDialog, QWidget, QHBoxLayout,  QSizeGrip, QRubberBand
+from PyQt5.QtWidgets import QLabel, QMainWindow, QApplication,  QPushButton, QFileDialog, QWidget, QHBoxLayout,  QSizeGrip, QRubberBand, QTextBrowser, QComboBox, QCheckBox
 from PyQt5.QtGui import QPixmap, QImage, QPainter
 from PyQt5 import uic, QtCore
 from textdetect_library import *
-from Textdetect import textdetect
+from Textdetect import textdetect     
 
+class MainWindow(QMainWindow):
+
+    cropped = None
+
+    def __init__(self):
+        super(MainWindow, self).__init__()
+        self.initUI()
+        self.textdetection = textdetect(None)
+        self.textdetection.getPath()
+
+    def initUI(self):
+        # Load ui file
+        uic.loadUi("window.ui", self)
+
+        # Define widgets
+        self.openButton = self.findChild(QPushButton, "openButton")
+        self.runButton = self.findChild(QPushButton, "runButton")
+        self.cropButton = self.findChild(QPushButton, "cropButton")
+        self.resetCropButton = self.findChild(QPushButton, "resetCropButton")
+        self.textWindow = self.findChild(QTextBrowser, "textWindow")
+        self.imageLabel = self.findChild(QLabel, "imageLabel")
+        self.background1 = self.findChild(QLabel, "background1")
+        self.imageX = self.imageLabel.geometry().getCoords()[2]
+        self.imageY = self.imageLabel.geometry().getCoords()[3]
+        self.preprocessingBox = self.findChild(QComboBox, "preprocessingBox")
+        self.radonCheck = self.findChild(QCheckBox, "radonCheck")
+
+        # Define methods
+        self.openButton.clicked.connect(self.handleOpen)
+        self.cropButton.clicked.connect(self.handleCrop)
+        self.cropButton.setCheckable(True)
+        self.runButton.clicked.connect(self.handleRun)
+        self.resetCropButton.clicked.connect(self.resetCrop)
+
+        # Ininitialize widgets
+        self.preprocessingBox.addItems(["greyscale", "contrast", "threshhold", "sobel", "laplace"])
+        self.preprocessingBox.setCurrentIndex(2)
+
+        # Styles
+        self.cropButton.setStyleSheet("background-color : lightgrey")
+        self.background1.setStyleSheet("background-color : lightgrey")
+
+        # Display app
+        self.show()
+
+    def handleOpen(self):
+        # Open file dialog and load path of image
+        image_path = QFileDialog.getOpenFileName(self, "Open Picture", "", "PNG Files (*.png);;JPG Files (*.jpg)")
+
+        # Load picture to graphicsView
+        if image_path:
+            self.cvOrig = cv.cvtColor(cv.imread(image_path[0]), cv.COLOR_BGR2RGB)
+            self.h, self.w = self.cvOrig.shape[:2]
+
+            self.pixmap = QPixmap(openCVtoQImage(self.cvOrig))
+            self.pixmap = self.pixmap.scaled(self.imageX, self.imageY, QtCore.Qt.KeepAspectRatio)
+ 
+            self.bR_x = self.pixmap.rect().bottomRight().x()
+            self.bR_y = self.pixmap.rect().bottomRight().y()
+
+            self.imageLabel.setPixmap(self.pixmap)
+            self.imageLabel.adjustSize()
+            self.textdetection.set_image(self.cvOrig) 
+            self.textWindow.setText("")
+
+    def handleCrop(self):
+        if self.cropButton.isChecked():
+            self.band = ResizableRubberBand(self.imageLabel)
+            self.band.setGeometry(0, 0, int(self.bR_x / 2), int(self.bR_y / 2))
+            # Set background color back to light-grey
+            self.cropButton.setStyleSheet("background-color : lightgrey")
+        else:
+            x, y, w, h = self.band.geometry().getCoords()
+
+            x1 = x / self.bR_x
+            x2 = w / self.bR_x
+            y1 = y / self.bR_y
+            y2 = h / self.bR_y
+
+            self.cropped = cropImage(self.cvOrig.copy(), x1, x2, y1, y2)
+            self.textdetection.set_image(self.cropped)
+            self.pixmap = QPixmap(openCVtoQImage(self.cropped))
+            self.pixmap = self.pixmap.scaled(self.imageX, self.imageY, QtCore.Qt.KeepAspectRatio)
+
+            # Close the RubberBand
+            self.band.close()
+
+            self.imageLabel.setPixmap(self.pixmap)
+            self.imageLabel.adjustSize()
+            # setting background color to light-blue
+            self.cropButton.setStyleSheet("background-color : lightblue")
+
+    # TEMP PARAM FOR TESTING
+    default_param = {
+        "preprocess_method" : 3,
+        "enable_radon" : True
+    }
+    
+    def handleRun(self):
+        print("Running analysis")
+        param = self.getParam()
+        detected_text = self.textdetection.runAnalysis(param)
+        self.textWindow.setText(detected_text)
+    
+    def getParam(self):
+        param = self.default_param
+        param["preprocess_method"] = self.preprocessingBox.currentIndex()
+        param["enable_radon"] = self.radonCheck.isChecked()
+        return param
+        
+    def resetCrop(self):   
+        self.pixmap = QPixmap(openCVtoQImage(self.cvOrig))
+        self.pixmap = self.pixmap.scaled(self.imageX, self.imageY, QtCore.Qt.KeepAspectRatio)
+        self.imageLabel.setPixmap(self.pixmap)
+        self.imageLabel.adjustSize()
+        self.textWindow.setText("")
+        self.textdetection.set_image(self.cvOrig)
+        
 class ResizableRubberBand(QWidget):
     def __init__(self, parent=None):
         super(ResizableRubberBand, self).__init__(parent)
@@ -70,112 +188,6 @@ class ResizableRubberBand(QWidget):
                     event.ignore()
                 self.mousePressPos = None
         super(ResizableRubberBand, self).mouseReleaseEvent(event)
-
-        
-
-class MainWindow(QMainWindow):
-
-    cropped = None
-
-    def __init__(self):
-        super(MainWindow, self).__init__()
-        self.initUI()
-        self.textdetection = textdetect(None)
-        self.textdetection.getPath()
-
-    def initUI(self):
-        # Load ui file
-        uic.loadUi("window.ui", self)
-
-        # Define widgets
-        self.openButton = self.findChild(QPushButton, "openButton")
-        self.runButton = self.findChild(QPushButton, "runButton")
-        self.cropButton = self.findChild(QPushButton, "cropButton")
-        self.resetCropButton = self.findChild(QPushButton, "resetCropButton")
-        # self.zoomOutButton = self.findChild(QPushButton, "zoomOutButton")
-        self.imageLabel = self.findChild(QLabel, "imageLabel")
-
-        self.openButton.clicked.connect(self.handleOpen)
-        self.cropButton.clicked.connect(self.handleCrop)
-        self.cropButton.setCheckable(True)
-
-        # Styles
-        self.cropButton.setStyleSheet("background-color : lightgrey")
-
-        self.runButton.clicked.connect(self.handleRun)
-        self.resetCropButton.clicked.connect(self.resetCrop)
-        # self.zoomOutButton.clicked.connect(self.zoomOut)
-        # Display app
-        self.show()
-
-    # TEMP PARAM FOR TESTING
-    param = {
-        "preprocess_method" : 3,
-        "enable_radon" : True
-    }
-    
-    def handleOpen(self):
-        # open file dialog and load path of image
-        image_path = QFileDialog.getOpenFileName(self, "Open Picture", "", "PNG Files (*.png);;JPG Files (*.jpg)")
-
-        # load picture to graphicsView
-        if image_path:
-            self.cvOrig = cv.cvtColor(cv.imread(image_path[0]), cv.COLOR_BGR2RGB)
-            self.h, self.w = self.cvOrig.shape[:2]
-
-            self.pixmap = QPixmap(openCVtoQImage(self.cvOrig))
-            self.pixmap = self.pixmap.scaled(800, 800, QtCore.Qt.KeepAspectRatio)
- 
-            self.bR_x = self.pixmap.rect().bottomRight().x()
-            self.bR_y = self.pixmap.rect().bottomRight().y()
-
-            self.imageLabel.setPixmap(self.pixmap)
-            self.imageLabel.adjustSize()
-            self.textdetection.set_image(self.cvOrig) 
-
-    def handleCrop(self):
-        if self.cropButton.isChecked():
-            self.band = ResizableRubberBand(self.imageLabel)
-            self.band.setGeometry(0, 0, 500, 500)
-            # set background color back to light-grey
-            self.cropButton.setStyleSheet("background-color : lightgrey")
-        else:
-            x, y, w, h = self.band.geometry().getCoords()
-
-            x1 = x / self.bR_x
-            x2 = w / self.bR_x
-            y1 = y / self.bR_y
-            y2 = h / self.bR_y
-
-            self.cropped = cropImage(self.cvOrig.copy(), x1, x2, y1, y2)
-            self.textdetection.set_image(self.cropped)
-            self.pixmap = QPixmap(openCVtoQImage(self.cropped))
-            self.pixmap = self.pixmap.scaled(800, 800, QtCore.Qt.KeepAspectRatio)
-
-            # Close the RubberBand
-            self.band.close()
-
-            self.imageLabel.setPixmap(self.pixmap)
-            self.imageLabel.adjustSize()
-            # setting background color to light-blue
-            self.cropButton.setStyleSheet("background-color : lightblue")
-
-    def handleRun(self):
-        print("Running analysis") 
-        self.textdetection.runAnalysis(self.param)
-
-    def resetCrop(self):   
-        self.pixmap = QPixmap(openCVtoQImage(self.cvOrig))
-        self.pixmap = self.pixmap.scaled(800, 800, QtCore.Qt.KeepAspectRatio)
-        self.imageLabel.setPixmap(self.pixmap)
-        self.imageLabel.adjustSize()
-        
-    # def zoomOut(self):
-    #     if self.scalePercent > 10:
-    #         self.scalePercent -= 10 
-    #         self.imageLabel.setPixmap(scaleImage(self.cvOrig, self.scalePercent, self.h, self.w))
-    #         self.imageLabel.adjustSize()
- 
 
 # initialize app
 app = QApplication(sys.argv)
