@@ -8,6 +8,7 @@ import pytesseract
 from skimage import transform
 from imutils.object_detection import non_max_suppression
 import time
+import math
 from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit
 
 class textdetect:
@@ -124,7 +125,7 @@ class textdetect:
                 # Rotate and save with the original resolution
                 M = cv.getRotationMatrix2D((w/2, h/2), 90 - rotation, 1)
                 self.preprocessed_image = cv.warpAffine(self.preprocessed_image, M, (w, h))
-                self.img = cv.warpAffine(self.img, M, (w, h))
+                self.img_rotated = cv.warpAffine(self.img, M, (w, h))
                 
 
         # Use EAST to detect text in the image
@@ -265,16 +266,11 @@ class textdetect:
 
         # Connect and sort text boxes
         def sort_and_connect(self):
-                # TODO Add theese changes to notebook = connect range scaling
                 connect_range = 200 # Max distance between boxes that will be connected, must be multiple of 2
                 height_correction = 0.85 # Variable that prevents vertically larger boxes from connecting with smaller boxes
 
                 # List containing connected boxes
                 connected_boxes = []
-
-                # Check if any text was found
-                if len(self.boxes_list) == 0:
-                        return 0
 
                 rect_list = self.boxes_list.tolist()
                 rect_list = sorted(rect_list, key=lambda k: [k[0], k[1]])
@@ -308,7 +304,7 @@ class textdetect:
                         rect_list = [i for i in rect_list if i not in boxes_to_remove] 
 
                 # Draw the expanded boxes on this image
-                orig_connected_rectangles = self.img.copy()
+                orig_connected_rectangles = self.img_rotated.copy()
 
                 # Iterate all boxes of an image
                 for (startX, startY, endX, endY) in connected_boxes:
@@ -320,13 +316,10 @@ class textdetect:
                         # Draw boxes in output image
                         cv.rectangle(orig_connected_rectangles, (startX, startY), (endX, endY), (0, 255, 0), 3)
 
-             
-                # TODO Display the image with boxes for interactivity
-                plt.imshow(orig_connected_rectangles)
-                plt.show()
-
                 # Sort the boxes
                 self.boxes_list = self.sort_boxes(connected_boxes)
+
+                return orig_connected_rectangles
 
         # Method for preprocessing the image for Tesseract usage
         def preprocess_tsrct(self, imge, scale_percent, bordersize, blur_amount):
@@ -362,8 +355,8 @@ class textdetect:
 
                 return processed
 
-        def extract_text(self, parameters):
-                tes_preprocess = self.img.copy()
+        def extract_text_psm7(self, parameters):
+                tes_preprocess = self.img_rotated.copy()
 
                 # Parameters
                 scale_percent = int(parameters["scaling"]) # percent of original size
@@ -412,10 +405,35 @@ class textdetect:
                         detected_text = detected_text + line + '\n'
 
                 return detected_text
-                
 
-        def runAnalysis(self, parameters): # TODO Create parameters in window py, take other params into account
+        def extract_text_psm1(self, parameters):
+                # Parameters
+                scale_percent = int(parameters["scaling"]) # percent of original size
+                blur_amount = int(parameters["blur"]) # how much blur to apply
+                bordersize = int(parameters["border"]) # size of border to add
+                minConf = int(parameters["minConf"]) # minimum confidence when detecting a word
+
+                # Configuration setting for converting image to string   <<- Check other CONFIG
+                configuration = ("-l deu+eng --oem 1 --psm 1")  
+                processed_img = self.preprocess_tsrct(self.img_rotated.copy(), scale_percent, bordersize, blur_amount)
+
+                # Preprocess the image before runnning text extraction with Tesseract
+                found_data_psm1 = pytesseract.image_to_data(processed_img, output_type=pytesseract.Output.DICT, config = configuration)
+
+                text = ""
+                for idx, el in enumerate(found_data_psm1["text"]):
+                        if found_data_psm1["block_num"][idx] > found_data_psm1["block_num"][idx-1]:
+                                text = text + "\n"
+                        if found_data_psm1["line_num"][idx] > found_data_psm1["line_num"][idx-1]:
+                                text = text + "\n"
+                        elif int(float(found_data_psm1["conf"][idx])) > minConf:
+                                text = text + str(el) + " "
+                return text   
+
+        def runAnalysis(self, parameters):
                 match parameters["preprocess_method"]:
+                        case 0:
+                                self.preprocessed_image = self.img
                         case 1:
                                 self.greyscale()
                         case 2:
@@ -425,18 +443,27 @@ class textdetect:
                         case 4:
                                 self.sobel()
                         case 5:
-                                self.laplace()        
+                                self.laplace()    
+
+                self.img_rotated = self.img    
 
                 if parameters["enable_radon"] == True:
                         self.use_radon_rotation()
                 
                 detected_text = ""
-                self.east_detect()
-                found_boxes = self.sort_and_connect()
-
-                if found_boxes != 0:
-                        detected_text = self.extract_text(parameters)
-                else:
-                        detected_text = "No text has been detected." 
+  
+                if parameters["ocrMode"] == "psm1":
+                        detected_text = self.extract_text_psm1(parameters)
+                elif parameters["ocrMode"] == "psm7":
+                        self.east_detect()
+                        # Check if any text boxes were found
+                        if len(self.boxes_list) != 0:
+                                image_rectangles = self.sort_and_connect()
+                                plt.imshow(image_rectangles)
+                                plt.show()
+                                detected_text = self.extract_text_psm7(parameters)
+                        else:
+                                detected_text = "No text has been detected." 
+                                
                 print(detected_text)
                 return detected_text

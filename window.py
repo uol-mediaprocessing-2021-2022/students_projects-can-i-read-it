@@ -1,7 +1,7 @@
 from sqlite3 import paramstyle
 import sys
 import cv2 as cv
-from PyQt5.QtWidgets import QLabel, QMainWindow, QApplication,  QPushButton, QFileDialog, QWidget, QHBoxLayout,  QSizeGrip, QRubberBand, QTextBrowser, QComboBox, QCheckBox
+from PyQt5.QtWidgets import QLabel, QMainWindow, QApplication,  QPushButton, QFileDialog, QWidget, QHBoxLayout,  QSizeGrip, QRubberBand, QTextBrowser, QComboBox, QCheckBox, QLineEdit
 from PyQt5.QtGui import QPixmap, QImage, QPainter
 from PyQt5 import uic, QtCore
 from textdetect_library import *
@@ -33,6 +33,11 @@ class MainWindow(QMainWindow):
         self.imageY = self.imageLabel.geometry().getCoords()[3]
         self.preprocessingBox = self.findChild(QComboBox, "preprocessingBox")
         self.radonCheck = self.findChild(QCheckBox, "radonCheck")
+        self.scalingEdit = self.findChild(QLineEdit, "scalingEdit")
+        self.blurEdit = self.findChild(QLineEdit, "blurEdit")
+        self.borderEdit = self.findChild(QLineEdit, "borderEdit")
+        self.confEdit = self.findChild(QLineEdit, "confEdit")
+        self.ocrBox = self.findChild(QComboBox, "ocrBox")
 
         # Define methods
         self.openButton.clicked.connect(self.handleOpen)
@@ -42,8 +47,10 @@ class MainWindow(QMainWindow):
         self.resetCropButton.clicked.connect(self.resetCrop)
 
         # Ininitialize widgets
-        self.preprocessingBox.addItems(["greyscale", "contrast", "threshhold", "sobel", "laplace"])
-        self.preprocessingBox.setCurrentIndex(2)
+        self.preprocessingBox.addItems(["none","greyscale", "contrast", "threshhold", "sobel", "laplace"])
+        self.preprocessingBox.setCurrentIndex(3)
+        self.ocrBox.addItems(["psm1", "psm7"])
+        self.ocrBox.setCurrentIndex(1)
 
         # Styles
         self.cropButton.setStyleSheet("background-color : lightgrey")
@@ -99,10 +106,15 @@ class MainWindow(QMainWindow):
             # setting background color to light-blue
             self.cropButton.setStyleSheet("background-color : lightblue")
 
-    # TEMP PARAM FOR TESTING
+    # DEFAULT PARAM
     default_param = {
         "preprocess_method" : 3,
-        "enable_radon" : True
+        "enable_radon" : True,
+        "scaling" : 100,
+        "blur" : 3,
+        "border" : 10,
+        "minConf" : 50,
+        "ocrMode" : "psm7"
     }
     
     def handleRun(self):
@@ -115,6 +127,11 @@ class MainWindow(QMainWindow):
         param = self.default_param
         param["preprocess_method"] = self.preprocessingBox.currentIndex()
         param["enable_radon"] = self.radonCheck.isChecked()
+        param["scaling"] = self.scalingEdit.text()
+        param["blur"] = self.blurEdit.text()
+        param["border"] = self.borderEdit.text()
+        param["minConf"] = self.confEdit.text()
+        param["ocrMode"] = self.ocrBox.currentText()
         return param
         
     def resetCrop(self):   
@@ -189,7 +206,7 @@ class ResizableRubberBand(QWidget):
                 self.mousePressPos = None
         super(ResizableRubberBand, self).mouseReleaseEvent(event)
 
-# initialize app
+# Initialize app
 app = QApplication(sys.argv)
 UIWindow = MainWindow()
 app.exec_()
