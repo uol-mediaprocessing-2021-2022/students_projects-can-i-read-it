@@ -19,7 +19,7 @@ class MainWindow(QMainWindow):
 
     def initUI(self):
         # Load ui file
-        uic.loadUi("window.ui", self)
+        uic.loadUi("students_projects-can-i-read-it/window.ui", self)
 
         # Define widgets
         self.openButton = self.findChild(QPushButton, "openButton")
@@ -66,18 +66,21 @@ class MainWindow(QMainWindow):
         # Load picture to graphicsView
         if image_path:
             self.cvOrig = cv.cvtColor(cv.imread(image_path[0]), cv.COLOR_BGR2RGB)
-            self.h, self.w = self.cvOrig.shape[:2]
-
-            self.pixmap = QPixmap(openCVtoQImage(self.cvOrig))
-            self.pixmap = self.pixmap.scaled(self.imageX, self.imageY, QtCore.Qt.KeepAspectRatio)
- 
-            self.bR_x = self.pixmap.rect().bottomRight().x()
-            self.bR_y = self.pixmap.rect().bottomRight().y()
-
-            self.imageLabel.setPixmap(self.pixmap)
-            self.imageLabel.adjustSize()
+            self.load_image(self.cvOrig)
             self.textdetection.set_image(self.cvOrig) 
-            self.textWindow.setText("")
+
+    def load_image(self, img):
+        self.h, self.w = img.shape[:2]
+
+        self.pixmap = QPixmap(openCVtoQImage(img))
+        self.pixmap = self.pixmap.scaled(self.imageX, self.imageY, QtCore.Qt.KeepAspectRatio)
+
+        self.bR_x = self.pixmap.rect().bottomRight().x()
+        self.bR_y = self.pixmap.rect().bottomRight().y()
+
+        self.imageLabel.setPixmap(self.pixmap)
+        self.imageLabel.adjustSize()
+        self.textWindow.setText("")
 
     def handleCrop(self):
         if self.cropButton.isChecked():
@@ -120,7 +123,10 @@ class MainWindow(QMainWindow):
     def handleRun(self):
         print("Running analysis")
         param = self.getParam()
-        detected_text = self.textdetection.runAnalysis(param)
+        detected_text, drawn_text = self.textdetection.runAnalysis(param)
+        if len(detected_text) > 1:
+            self.load_image(drawn_text)
+            
         self.textWindow.setText(detected_text)
     
     def getParam(self):
@@ -140,7 +146,10 @@ class MainWindow(QMainWindow):
         self.imageLabel.setPixmap(self.pixmap)
         self.imageLabel.adjustSize()
         self.textWindow.setText("")
+        self.load_image(self.cvOrig)
         self.textdetection.set_image(self.cvOrig)
+
+
         
 class ResizableRubberBand(QWidget):
     def __init__(self, parent=None):

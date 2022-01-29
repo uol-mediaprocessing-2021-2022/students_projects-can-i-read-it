@@ -10,6 +10,7 @@ from imutils.object_detection import non_max_suppression
 import time
 import math
 from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit
+from PIL import ImageFont, ImageDraw, Image
 
 class textdetect:
         # The preprocessed image using a chosen method
@@ -355,8 +356,19 @@ class textdetect:
 
                 return processed
 
+        # Method fot getting the dominant color
+        # Source: https://stackoverflow.com/questions/50899692/most-dominant-color-in-rgb-image-opencv-numpy-python
+        def bincount(self, a):
+                a2D = a.reshape(-1,a.shape[-1])
+                col_range = (256, 256, 256) 
+                a1D = np.ravel_multi_index(a2D.T, col_range)
+                return np.unravel_index(np.bincount(a1D).argmax(), col_range)
+
+
+        # Method for extracting text using Tesseract in psm 7 mode 
         def extract_text_psm7(self, parameters):
                 tes_preprocess = self.img_rotated.copy()
+                text_drawn = self.img_rotated.copy()
 
                 # Parameters
                 scale_percent = int(parameters["scaling"]) # percent of original size
@@ -396,6 +408,42 @@ class textdetect:
                                 text = text.replace("|","")
                                 text = text.replace("ı","")
 
+                                # Blur the part of the photo containing the text line
+                                if len(text) > 1:
+                                        text_drawn[y_start:y_end, x_start:x_end] = cv.medianBlur(text_drawn[y_start:y_end, x_start:x_end], 333)
+
+                                        # Draw the detected text in the image   
+                                        img_pil = Image.fromarray(text_drawn[y_start:y_end, x_start:x_end])
+                                        draw = ImageDraw.Draw(img_pil)
+                                        fontsize = 10
+                                        font_path = "students_projects-can-i-read-it/micross.ttf"
+                                        font = ImageFont.truetype(font_path, fontsize)
+                                        
+                                        # Adjust the fontsize to match the box
+                                        breakpoint = (x_end - x_start) * 0.99
+                                        jumpsize = 50
+                                        
+                                        while True:
+                                                if font.getsize(text)[0] < breakpoint:
+                                                        fontsize += jumpsize
+                                                else:
+                                                        jumpsize = jumpsize // 2
+                                                        fontsize -= jumpsize
+                                                
+                                                font = ImageFont.truetype(font_path, fontsize)
+                                                if jumpsize <= 1:
+                                                        break
+                                        
+                                        color = (255,255,255)
+                                        bgclr = self.bincount(text_drawn[y_start:y_end, x_start:x_end])
+                                        
+                                        # Source: https://stackoverflow.com/questions/3942878/how-to-decide-font-color-in-white-or-black-depending-on-background-color
+                                        if (bgclr[0]*0.299 + bgclr[1]*0.587 + bgclr[2]*0.114) > 155:
+                                                color = (0,0,0)         
+
+                                        draw.text((0, 0), text, color, font=font)
+                                        text_drawn[y_start:y_end, x_start:x_end] = np.array(img_pil)
+
                         # Append line to the list of detected lines
                         found_text_psm7 += text + '\n'
                         results.append(text.rstrip())
@@ -404,7 +452,7 @@ class textdetect:
                 for line in results:
                         detected_text = detected_text + line + '\n'
 
-                return detected_text
+                return detected_text, text_drawn
 
         def extract_text_psm1(self, parameters):
                 # Parameters
@@ -451,6 +499,7 @@ class textdetect:
                         self.use_radon_rotation()
                 
                 detected_text = ""
+                text_drawn = None
   
                 if parameters["ocrMode"] == "psm1":
                         detected_text = self.extract_text_psm1(parameters)
@@ -459,11 +508,16 @@ class textdetect:
                         # Check if any text boxes were found
                         if len(self.boxes_list) != 0:
                                 image_rectangles = self.sort_and_connect()
-                                plt.imshow(image_rectangles)
-                                plt.show()
-                                detected_text = self.extract_text_psm7(parameters)
+
+                                window_name = 'Detected text'
+                                cv.namedWindow(window_name, cv.WINDOW_NORMAL)
+                                cv.resizeWindow(window_name, 600,600)
+                                image_rectangles = cv.cvtColor(image_rectangles, cv.COLOR_BGR2RGB)
+                                cv.imshow(window_name, image_rectangles)
+                                
+                                detected_text, text_drawn = self.extract_text_psm7(parameters)
                         else:
                                 detected_text = "No text has been detected." 
                                 
                 print(detected_text)
-                return detected_text
+                return detected_text, text_drawn
