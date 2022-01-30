@@ -416,24 +416,29 @@ class textdetect:
                                         # Draw the detected text in the image   
                                         img_pil = Image.fromarray(text_drawn[y_start:y_end, x_start:x_end])
                                         draw = ImageDraw.Draw(img_pil)
-                                        fontsize = 10
+                                        fontsize = 20
                                         font_path = "micross.ttf"
                                         font = ImageFont.truetype(font_path, fontsize)
                                         
                                         # Adjust the fontsize to match the box
-                                        breakpoint = (x_end - x_start) * 0.99
-                                        jumpsize = 50
+                                        breakpoint_x = (x_end - x_start) * 0.97
+                                        breakpoint_y = (y_end - y_start) * 0.97
+                                        jumpsize = 30
                                         
                                         while True:
-                                                if font.getsize(text)[0] < breakpoint:
-                                                        fontsize += jumpsize
-                                                else:
-                                                        jumpsize = jumpsize // 2
-                                                        fontsize -= jumpsize
-                                                
-                                                font = ImageFont.truetype(font_path, fontsize)
-                                                if jumpsize <= 1:
+                                                try:
+                                                        if font.getsize(text)[0] < breakpoint_x and font.getsize(text)[1] < breakpoint_y:
+                                                                fontsize += jumpsize
+                                                        else:
+                                                                jumpsize = jumpsize // 2
+                                                                fontsize -= jumpsize
+                                                        
+                                                        font = ImageFont.truetype(font_path, fontsize)
+                                                        if jumpsize <= 1:
+                                                                break
+                                                except OSError:
                                                         break
+
                                         
                                         color = (255,255,255)
                                         bgclr = self.bincount(text_drawn[y_start:y_end, x_start:x_end])

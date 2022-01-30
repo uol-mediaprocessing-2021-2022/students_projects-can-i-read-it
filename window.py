@@ -13,7 +13,10 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         super(MainWindow, self).__init__()
+     
         self.initUI()
+        self.statusBar().hide()
+        self.setContentsMargins(0, 0, 0, 0)
         self.textdetection = textdetect(None)
         self.textdetection.getPath()
 
@@ -51,13 +54,14 @@ class MainWindow(QMainWindow):
         self.preprocessingBox.addItems(["none","greyscale", "contrast", "threshhold", "sobel", "laplace"])
         self.preprocessingBox.setCurrentIndex(3)
         self.languageBox.addItems(["deu", "eng", "deu+eng", "fra"])
-        self.languageBox.setCurrentIndex(0)
+        self.languageBox.setCurrentIndex(2)
         self.ocrBox.addItems(["psm1", "psm7"])
         self.ocrBox.setCurrentIndex(1)
 
         # Styles
         self.cropButton.setStyleSheet("background-color : lightgrey")
-        self.background1.setStyleSheet("background-color : lightgrey")
+        self.background1.setStyleSheet("background-color : #ffdf99")
+        self.imageLabel.setStyleSheet("background-color : #fff7e6")
 
         # Display app
         self.show()
@@ -121,14 +125,14 @@ class MainWindow(QMainWindow):
         "border" : 10,
         "minConf" : 50,
         "ocrMode" : "psm7",
-        "languageMode" : "deu"
+        "languageMode" : "deu+eng"
     }
     
     def handleRun(self):
         print("Running analysis")
         param = self.getParam()
         detected_text, drawn_text = self.textdetection.runAnalysis(param)
-        if len(detected_text) > 1:
+        if len(detected_text) > 1 and drawn_text is not None:
             self.load_image(drawn_text)
             
         self.textWindow.setText(detected_text)
