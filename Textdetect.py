@@ -375,6 +375,7 @@ class textdetect:
                 blur_amount = int(parameters["blur"]) # how much blur to apply
                 bordersize = int(parameters["border"]) # size of border to add
                 minConf = int(parameters["minConf"]) # minimum confidence when detecting a word
+                language = parameters["languageMode"] # language used for tesseract text detection
 
                 results = []
                 found_text_psm7 = ""
@@ -393,7 +394,7 @@ class textdetect:
                                 cropped_img = self.preprocess_tsrct(cropped_img, scale_percent, bordersize, blur_amount)
 
                                 # Configuration setting for converting image to string
-                                configuration = ("-l deu+eng --oem 1 --psm 7")  
+                                configuration = ("-l " + language + " --oem 1 --psm 7")  
 
                                 # This will recognize the text from the image of the bounding box
                                 d = pytesseract.image_to_data(cropped_img, output_type=pytesseract.Output.DICT, config=configuration)
@@ -416,7 +417,7 @@ class textdetect:
                                         img_pil = Image.fromarray(text_drawn[y_start:y_end, x_start:x_end])
                                         draw = ImageDraw.Draw(img_pil)
                                         fontsize = 10
-                                        font_path = "students_projects-can-i-read-it/micross.ttf"
+                                        font_path = "micross.ttf"
                                         font = ImageFont.truetype(font_path, fontsize)
                                         
                                         # Adjust the fontsize to match the box
@@ -460,9 +461,10 @@ class textdetect:
                 blur_amount = int(parameters["blur"]) # how much blur to apply
                 bordersize = int(parameters["border"]) # size of border to add
                 minConf = int(parameters["minConf"]) # minimum confidence when detecting a word
+                language = parameters["languageMode"] # language that is used for tesseract detection
 
                 # Configuration setting for converting image to string   <<- Check other CONFIG
-                configuration = ("-l deu+eng --oem 1 --psm 1")  
+                configuration = ("-l " + language + " --oem 1 --psm 1")  
                 processed_img = self.preprocess_tsrct(self.img_rotated.copy(), scale_percent, bordersize, blur_amount)
 
                 # Preprocess the image before runnning text extraction with Tesseract

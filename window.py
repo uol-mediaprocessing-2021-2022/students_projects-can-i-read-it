@@ -38,6 +38,7 @@ class MainWindow(QMainWindow):
         self.borderEdit = self.findChild(QLineEdit, "borderEdit")
         self.confEdit = self.findChild(QLineEdit, "confEdit")
         self.ocrBox = self.findChild(QComboBox, "ocrBox")
+        self.languageBox = self.findChild(QComboBox, "languageBox")
 
         # Define methods
         self.openButton.clicked.connect(self.handleOpen)
@@ -49,6 +50,8 @@ class MainWindow(QMainWindow):
         # Ininitialize widgets
         self.preprocessingBox.addItems(["none","greyscale", "contrast", "threshhold", "sobel", "laplace"])
         self.preprocessingBox.setCurrentIndex(3)
+        self.languageBox.addItems(["deu", "eng", "deu+eng", "fra"])
+        self.languageBox.setCurrentIndex(0)
         self.ocrBox.addItems(["psm1", "psm7"])
         self.ocrBox.setCurrentIndex(1)
 
@@ -105,7 +108,7 @@ class MainWindow(QMainWindow):
             self.band.close()
 
             self.imageLabel.setPixmap(self.pixmap)
-            self.imageLabel.adjustSize()
+            self.imageLabel.adustSize()
             # setting background color to light-blue
             self.cropButton.setStyleSheet("background-color : lightblue")
 
@@ -117,7 +120,8 @@ class MainWindow(QMainWindow):
         "blur" : 3,
         "border" : 10,
         "minConf" : 50,
-        "ocrMode" : "psm7"
+        "ocrMode" : "psm7",
+        "languageMode" : "deu"
     }
     
     def handleRun(self):
@@ -138,6 +142,7 @@ class MainWindow(QMainWindow):
         param["border"] = self.borderEdit.text()
         param["minConf"] = self.confEdit.text()
         param["ocrMode"] = self.ocrBox.currentText()
+        param["languageMode"] = self.languageBox.currentText()
         return param
         
     def resetCrop(self):   

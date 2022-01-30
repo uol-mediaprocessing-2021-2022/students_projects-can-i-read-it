@@ -145,7 +145,7 @@
     <property name="currentIndex">
      <number>-1</number>
     </property>
-    <property name="placeholderText">
+    <property name="placeholderText" stdset="0">
      <string>Set preprocessing method</string>
     </property>
    </widget>
@@ -209,7 +209,7 @@
     <property name="currentIndex">
      <number>-1</number>
     </property>
-    <property name="placeholderText">
+    <property name="placeholderText" stdset="0">
      <string>Set OCR mode</string>
     </property>
    </widget>
@@ -342,6 +342,29 @@
      <string>50</string>
     </property>
    </widget>
+   <widget class="QComboBox" name="languageBox">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>940</y>
+      <width>221</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="languageLabel">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>920</y>
+      <width>191</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Set OCR language</string>
+    </property>
+   </widget>
    <zorder>background1</zorder>
    <zorder>openButton</zorder>
    <zorder>runButton</zorder>
@@ -363,6 +386,8 @@
    <zorder>borderEdit</zorder>
    <zorder>tsrctLabel_4</zorder>
    <zorder>confEdit</zorder>
+   <zorder>languageBox</zorder>
+   <zorder>languageLabel</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -370,7 +395,7 @@
      <x>0</x>
      <y>0</y>
      <width>990</width>
-     <height>22</height>
+     <height>13</height>
     </rect>
    </property>
   </widget>
