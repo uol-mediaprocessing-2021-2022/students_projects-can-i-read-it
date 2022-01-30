@@ -479,19 +479,32 @@ class textdetect:
                 return text   
 
         def runAnalysis(self, parameters):
-                match parameters["preprocess_method"]:
-                        case 0:
-                                self.preprocessed_image = self.img
-                        case 1:
-                                self.greyscale()
-                        case 2:
-                                self.contrast()
-                        case 3:
-                                self.threshold()
-                        case 4:
-                                self.sobel()
-                        case 5:
-                                self.laplace()    
+                if parameters["preprocess_method"] == 0:
+                        self.preprocessed_image = self.img
+                elif parameters["preprocess_method"] == 1:
+                        self.greyscale()
+                elif parameters["preprocess_method"] == 2:
+                        self.constrast()
+                elif parameters["preprocess_method"] == 3:
+                        self.threshold()
+                elif parameters["preprocess_method"] == 4:
+                        self.sobel()
+                elif parameters["preprocess_method"] == 5:
+                        self.laplace()
+                # if you are using Python 3.9 and up you should be using this instead to increase performance:
+                #match parameters["preprocess_method"]:
+                        #case 0:
+                                #self.preprocessed_image = self.img
+                        #case 1:
+                                #self.greyscale()
+                        #case 2:
+                                #self.contrast()
+                        #case 3:
+                                #self.threshold()
+                        #case 4:
+                                #self.sobel()
+                        #case 5:
+                                #self.laplace()    
 
                 self.img_rotated = self.img    
 

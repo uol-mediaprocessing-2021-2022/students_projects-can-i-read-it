@@ -19,7 +19,7 @@ class MainWindow(QMainWindow):
 
     def initUI(self):
         # Load ui file
-        uic.loadUi("students_projects-can-i-read-it/window.ui", self)
+        uic.loadUi("window.ui", self)
 
         # Define widgets
         self.openButton = self.findChild(QPushButton, "openButton")
