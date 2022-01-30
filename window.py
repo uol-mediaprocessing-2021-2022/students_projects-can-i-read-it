@@ -108,7 +108,7 @@ class MainWindow(QMainWindow):
             self.band.close()
 
             self.imageLabel.setPixmap(self.pixmap)
-            self.imageLabel.adustSize()
+            self.imageLabel.adjustSize()
             # setting background color to light-blue
             self.cropButton.setStyleSheet("background-color : lightblue")
 
