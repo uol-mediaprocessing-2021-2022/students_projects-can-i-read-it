@@ -53,7 +53,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Reset crop</string>
+     <string>Reset</string>
     </property>
    </widget>
    <widget class="QLabel" name="imageLabel">
@@ -153,7 +153,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>920</y>
+      <y>970</y>
       <width>251</width>
       <height>20</height>
      </rect>
@@ -175,7 +175,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Set preprocessing method</string>
+     <string>EAST preprocessing method</string>
     </property>
    </widget>
    <widget class="QLabel" name="ocrLabel">
@@ -217,7 +217,7 @@
     <property name="geometry">
      <rect>
       <x>90</x>
-      <y>970</y>
+      <y>1020</y>
       <width>31</width>
       <height>22</height>
      </rect>
@@ -233,7 +233,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>970</y>
+      <y>1020</y>
       <width>61</width>
       <height>16</height>
      </rect>
@@ -246,7 +246,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>950</y>
+      <y>1000</y>
       <width>161</width>
       <height>16</height>
      </rect>
@@ -259,7 +259,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>1000</y>
+      <y>1050</y>
       <width>71</width>
       <height>16</height>
      </rect>
@@ -272,7 +272,7 @@
     <property name="geometry">
      <rect>
       <x>100</x>
-      <y>1000</y>
+      <y>1050</y>
       <width>21</width>
       <height>22</height>
      </rect>
@@ -288,7 +288,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>1030</y>
+      <y>1080</y>
       <width>71</width>
       <height>16</height>
      </rect>
@@ -301,7 +301,7 @@
     <property name="geometry">
      <rect>
       <x>100</x>
-      <y>1030</y>
+      <y>1080</y>
       <width>21</width>
       <height>22</height>
      </rect>
@@ -317,7 +317,7 @@
     <property name="geometry">
      <rect>
       <x>290</x>
-      <y>1000</y>
+      <y>1040</y>
       <width>211</width>
       <height>16</height>
      </rect>
@@ -330,16 +330,16 @@
     <property name="geometry">
      <rect>
       <x>470</x>
-      <y>1000</y>
+      <y>1040</y>
       <width>21</width>
       <height>22</height>
      </rect>
     </property>
     <property name="text">
-     <string>50</string>
+     <string>30</string>
     </property>
     <property name="placeholderText">
-     <string>50</string>
+     <string>30</string>
     </property>
    </widget>
    <widget class="QComboBox" name="languageBox">
@@ -378,6 +378,87 @@
      <string>Tesseract detection settings:</string>
     </property>
    </widget>
+   <widget class="QLabel" name="tsrctLabel_6">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>950</y>
+      <width>91</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>EAST resolution:</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="resEdit">
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>950</y>
+      <width>41</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>1280</string>
+    </property>
+    <property name="placeholderText">
+     <string>1280</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="tsrctLabel_7">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>920</y>
+      <width>81</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Filter strength:</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="strengthEdit">
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>920</y>
+      <width>41</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>def</string>
+    </property>
+    <property name="placeholderText">
+     <string>def</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="languageLabel_2">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>990</y>
+      <width>191</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Color removal method</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="tesMethodBox">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>1010</y>
+      <width>221</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
    <zorder>background1</zorder>
    <zorder>openButton</zorder>
    <zorder>runButton</zorder>
@@ -402,6 +483,12 @@
    <zorder>languageBox</zorder>
    <zorder>languageLabel</zorder>
    <zorder>tsrctLabel_5</zorder>
+   <zorder>tsrctLabel_6</zorder>
+   <zorder>resEdit</zorder>
+   <zorder>tsrctLabel_7</zorder>
+   <zorder>strengthEdit</zorder>
+   <zorder>languageLabel_2</zorder>
+   <zorder>tesMethodBox</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

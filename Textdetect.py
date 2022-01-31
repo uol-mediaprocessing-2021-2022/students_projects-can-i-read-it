@@ -54,9 +54,12 @@ class textdetect:
                 self.preprocessed_image = self.merge_preprocessed(img_gray)
 
         # Change contrast                       
-        def contrast(self):
+        def contrast(self, strength):
                 alpha = 2 # Contrast
                 beta = 0 # Brightness
+
+                if strength != "def":
+                        alpha = strength
 
                 self.greyscale()
                 self.preprocessed_image = cv.convertScaleAbs(self.preprocessed_image, alpha=alpha, beta=beta)
@@ -67,8 +70,12 @@ class textdetect:
                 self.preprocessed_image = self.merge_preprocessed(img_bin)
         
         # Apply edge-detection using sobel filter on the grayscale picture
-        def sobel(self):
+        def sobel(self, strength):
                 scale = 1
+
+                if strength != "def":
+                        scale = strength
+
                 delta = 0
                 ddepth = cv.CV_16S
                 # Reduce noise using gaussian blur
@@ -88,9 +95,13 @@ class textdetect:
         
         # Apply edge-detection using laplacian filter on grayscale picture
         # Source : https://docs.opencv.org/3.4/d5/db5/tutorial_laplace_operator.html
-        def laplace(self):
+        def laplace(self, strength):
                 ddepth = cv.CV_16S
                 kernel_size = 3
+
+                if strength != "def":
+                        kernel_size = strength
+
                 src = cv.GaussianBlur(self.img, (3, 3), 0)
                 gray = cv.cvtColor(src, cv.COLOR_BGR2GRAY)
                 # Apply the laplace function to this picture
@@ -131,12 +142,12 @@ class textdetect:
 
         # Use EAST to detect text in the image
         # Source: https://www.pyimagesearch.com/2018/08/20/opencv-text-detection-east-text-detector/
-        def east_detect(self):
+        def east_detect(self, resolution):
                 # Set min confidence for text detection
                 min_score = 0.99 # Adjustable
 
                 # Set scaling resolution, must be multiple of 32 for EAST
-                res = 1280 # 1280x1280 works good
+                res = resolution # 1280x1280 works good
 
                 # Create copy and grab image dimensions
                 orig = self.preprocessed_image.copy()
@@ -323,26 +334,37 @@ class textdetect:
                 return orig_connected_rectangles
 
         # Method for preprocessing the image for Tesseract usage
-        def preprocess_tsrct(self, imge, scale_percent, bordersize, blur_amount):
+        def preprocess_tsrct(self, imge, scale_percent, bordersize, blur_amount, color_cor_method):
+                alpha = 2.5 # Contrast
+                beta = 0 # Brightness
+
                 width = int(imge.shape[1] * scale_percent / 100)
                 height = int(imge.shape[0] * scale_percent / 100)
-                dim = (width, height) # TODO WHy can this be 0 ???
+                dim = (width, height) # TODO Why can this be 0 ???
                 
                 # Resize image
                 resized = cv.resize(imge, dim, interpolation = cv.INTER_AREA)
                 gray = cv.cvtColor(resized, cv.COLOR_BGR2GRAY)
-                processed = cv.threshold(gray, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)[1]
 
-                # Make sure that black text is on white background
-                w_pix_num = np.sum(processed == 255)
-                b_pix_num = np.sum(processed == 0)
+                # Apply a color removal method
+                if color_cor_method == "threshold":
+                        processed = cv.threshold(gray, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)[1]
 
-                if b_pix_num > w_pix_num:
-                        processed = cv.bitwise_not(processed)
+                        # Make sure that black text is on white background
+                        w_pix_num = np.sum(processed == 255)
+                        b_pix_num = np.sum(processed == 0)
+
+                        if b_pix_num > w_pix_num:
+                                processed = cv.bitwise_not(processed)
+                elif color_cor_method == "contrast":
+                        processed = cv.convertScaleAbs(gray, alpha=alpha, beta=beta)
+                else:
+                        processed = gray
         
                 # Smoothen the background to reduce noise, median blur seems to perform better
                 # processed = cv.GaussianBlur(processed, (blur_amount,blur_amount), 0)
-                processed = cv.medianBlur(processed,blur_amount)
+                if blur_amount != 0:
+                        processed = cv.medianBlur(processed,blur_amount)
 
                 # Add white border to image
                 processed = cv.copyMakeBorder(
@@ -376,9 +398,9 @@ class textdetect:
                 bordersize = int(parameters["border"]) # size of border to add
                 minConf = int(parameters["minConf"]) # minimum confidence when detecting a word
                 language = parameters["languageMode"] # language used for tesseract text detection
+                tes_method = parameters["tes_method"] # method of color removal for tesseract
 
                 results = []
-                found_text_psm7 = ""
 
                 for index, elem in enumerate(self.boxes_list):
 
@@ -391,7 +413,7 @@ class textdetect:
                                 x_end = int(endX *  self.rW)
 
                                 cropped_img = tes_preprocess[y_start:y_end, x_start:x_end]
-                                cropped_img = self.preprocess_tsrct(cropped_img, scale_percent, bordersize, blur_amount)
+                                cropped_img = self.preprocess_tsrct(cropped_img, scale_percent, bordersize, blur_amount, tes_method)
 
                                 # Configuration setting for converting image to string
                                 configuration = ("-l " + language + " --oem 1 --psm 7")  
@@ -421,8 +443,8 @@ class textdetect:
                                         font = ImageFont.truetype(font_path, fontsize)
                                         
                                         # Adjust the fontsize to match the box
-                                        breakpoint_x = (x_end - x_start) * 0.97
-                                        breakpoint_y = (y_end - y_start) * 0.97
+                                        breakpoint_x = (x_end - x_start) * 0.92
+                                        breakpoint_y = (y_end - y_start) * 0.92
                                         jumpsize = 30
                                         
                                         while True:
@@ -447,11 +469,13 @@ class textdetect:
                                         if (bgclr[0]*0.299 + bgclr[1]*0.587 + bgclr[2]*0.114) > 155:
                                                 color = (0,0,0)         
 
-                                        draw.text((0, 0), text, color, font=font)
-                                        text_drawn[y_start:y_end, x_start:x_end] = np.array(img_pil)
+                                        try:
+                                                draw.text((0, 0), text, color, font=font)
+                                                text_drawn[y_start:y_end, x_start:x_end] = np.array(img_pil)
+                                        except OSError:
+                                                continue
 
                         # Append line to the list of detected lines
-                        found_text_psm7 += text + '\n'
                         results.append(text.rstrip())
 
                 detected_text = ""
@@ -467,10 +491,11 @@ class textdetect:
                 bordersize = int(parameters["border"]) # size of border to add
                 minConf = int(parameters["minConf"]) # minimum confidence when detecting a word
                 language = parameters["languageMode"] # language that is used for tesseract detection
+                tes_method = parameters["tes_method"] # method of color removal for tesseract
 
                 # Configuration setting for converting image to string   <<- Check other CONFIG
                 configuration = ("-l " + language + " --oem 1 --psm 1")  
-                processed_img = self.preprocess_tsrct(self.img_rotated.copy(), scale_percent, bordersize, blur_amount)
+                processed_img = self.preprocess_tsrct(self.img_rotated.copy(), scale_percent, bordersize, blur_amount, tes_method)
 
                 # Preprocess the image before runnning text extraction with Tesseract
                 found_data_psm1 = pytesseract.image_to_data(processed_img, output_type=pytesseract.Output.DICT, config = configuration)
@@ -486,18 +511,23 @@ class textdetect:
                 return text   
 
         def runAnalysis(self, parameters):
+                
+                strength = parameters["strength"]
+                if strength != "def":
+                        strength = int(strength)
+
                 if parameters["preprocess_method"] == 0:
                         self.preprocessed_image = self.img
                 elif parameters["preprocess_method"] == 1:
                         self.greyscale()
                 elif parameters["preprocess_method"] == 2:
-                        self.constrast()
+                        self.contrast(strength)
                 elif parameters["preprocess_method"] == 3:
                         self.threshold()
                 elif parameters["preprocess_method"] == 4:
-                        self.sobel()
+                        self.sobel(strength)
                 elif parameters["preprocess_method"] == 5:
-                        self.laplace()
+                        self.laplace(strength)
                 # if you are using Python 3.9 and up you should be using this instead to increase performance:
                 #match parameters["preprocess_method"]:
                         #case 0:
@@ -523,8 +553,9 @@ class textdetect:
   
                 if parameters["ocrMode"] == "psm1":
                         detected_text = self.extract_text_psm1(parameters)
+                        text_drawn = self.img_rotated 
                 elif parameters["ocrMode"] == "psm7":
-                        self.east_detect()
+                        self.east_detect(parameters["east_res"])
                         # Check if any text boxes were found
                         if len(self.boxes_list) != 0:
                                 image_rectangles = self.sort_and_connect()

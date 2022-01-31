@@ -42,6 +42,9 @@ class MainWindow(QMainWindow):
         self.confEdit = self.findChild(QLineEdit, "confEdit")
         self.ocrBox = self.findChild(QComboBox, "ocrBox")
         self.languageBox = self.findChild(QComboBox, "languageBox")
+        self.tesMethodBox = self.findChild(QComboBox, "tesMethodBox")
+        self.strengthEdit = self.findChild(QLineEdit, "strengthEdit")
+        self.resEdit = self.findChild(QLineEdit, "resEdit")
 
         # Define methods
         self.openButton.clicked.connect(self.handleOpen)
@@ -55,6 +58,8 @@ class MainWindow(QMainWindow):
         self.preprocessingBox.setCurrentIndex(3)
         self.languageBox.addItems(["deu", "eng", "deu+eng", "fra"])
         self.languageBox.setCurrentIndex(2)
+        self.tesMethodBox.addItems(["threshold", "contrast", "grayscale"])
+        self.tesMethodBox.setCurrentIndex(0)
         self.ocrBox.addItems(["psm1", "psm7"])
         self.ocrBox.setCurrentIndex(1)
 
@@ -71,7 +76,7 @@ class MainWindow(QMainWindow):
         image_path = QFileDialog.getOpenFileName(self, "Open Picture", "", "PNG Files (*.png);;JPG Files (*.jpg)")
 
         # Load picture to graphicsView
-        if image_path:
+        if len(image_path[0]) > 0:
             self.cvOrig = cv.cvtColor(cv.imread(image_path[0]), cv.COLOR_BGR2RGB)
             self.load_image(self.cvOrig)
             self.textdetection.set_image(self.cvOrig) 
@@ -123,8 +128,11 @@ class MainWindow(QMainWindow):
         "scaling" : 100,
         "blur" : 3,
         "border" : 10,
-        "minConf" : 50,
+        "minConf" : 30,
         "ocrMode" : "psm7",
+        "east_res" : 1280,
+        "strength" : "def",
+        "tes_method" : "threshold",
         "languageMode" : "deu+eng"
     }
     
@@ -147,6 +155,9 @@ class MainWindow(QMainWindow):
         param["minConf"] = self.confEdit.text()
         param["ocrMode"] = self.ocrBox.currentText()
         param["languageMode"] = self.languageBox.currentText()
+        param["east_res"] = int(self.resEdit.text())
+        param["strength"] = self.strengthEdit.text()
+        param["tes_method"] = self.tesMethodBox.currentText()
         return param
         
     def resetCrop(self):   
