@@ -54,7 +54,7 @@ class MainWindow(QMainWindow):
         self.resetCropButton.clicked.connect(self.resetCrop)
 
         # Ininitialize widgets
-        self.preprocessingBox.addItems(["none","greyscale", "contrast", "threshhold", "sobel", "laplace"])
+        self.preprocessingBox.addItems(["none","greyscale", "contrast", "threshold", "sobel", "laplace"])
         self.preprocessingBox.setCurrentIndex(3)
         self.languageBox.addItems(["deu", "eng", "deu+eng", "fra"])
         self.languageBox.setCurrentIndex(2)
@@ -167,6 +167,7 @@ class MainWindow(QMainWindow):
         self.imageLabel.adjustSize()
         self.textWindow.setText("")
         self.load_image(self.cvOrig)
+        self.textdetection.close_windows()
         self.textdetection.set_image(self.cvOrig)
 
 

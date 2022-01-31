@@ -550,6 +550,7 @@ class textdetect:
                 
                 detected_text = ""
                 text_drawn = None
+                ratio = self.img_rotated.shape[0] / self.img_rotated.shape[1]
   
                 if parameters["ocrMode"] == "psm1":
                         detected_text = self.extract_text_psm1(parameters)
@@ -562,13 +563,21 @@ class textdetect:
 
                                 window_name = 'Detected text'
                                 cv.namedWindow(window_name, cv.WINDOW_NORMAL)
-                                cv.resizeWindow(window_name, 600,600)
+                                cv.resizeWindow(window_name, 600, int(600 * ratio))
                                 image_rectangles = cv.cvtColor(image_rectangles, cv.COLOR_BGR2RGB)
                                 cv.imshow(window_name, image_rectangles)
                                 
                                 detected_text, text_drawn = self.extract_text_psm7(parameters)
+
+                                window_name2 = 'Overlayed text'
+                                cv.namedWindow(window_name2, cv.WINDOW_NORMAL)
+                                cv.resizeWindow(window_name2, 600, int(600 * ratio))
+                                text_drawn = cv.cvtColor(text_drawn, cv.COLOR_BGR2RGB)
+                                cv.imshow(window_name2, text_drawn)      
                         else:
                                 detected_text = "No text has been detected." 
                                 
-                print(detected_text)
-                return detected_text, text_drawn
+                return detected_text, self.img_rotated
+
+        def close_windows(self):
+                cv.destroyAllWindows()
