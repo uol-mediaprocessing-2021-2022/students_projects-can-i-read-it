@@ -1,0 +1,511 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>992</width>
+    <height>1180</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Can I read it?</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <widget class="QPushButton" name="openButton">
+    <property name="geometry">
+     <rect>
+      <x>140</x>
+      <y>820</y>
+      <width>71</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Open</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="runButton">
+    <property name="geometry">
+     <rect>
+      <x>140</x>
+      <y>780</y>
+      <width>251</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Detect Text</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="resetCropButton">
+    <property name="geometry">
+     <rect>
+      <x>310</x>
+      <y>820</y>
+      <width>81</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Reset</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="imageLabel">
+    <property name="geometry">
+     <rect>
+      <x>-10</x>
+      <y>0</y>
+      <width>1011</width>
+      <height>761</height>
+     </rect>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>1200</width>
+      <height>1200</height>
+     </size>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="scaledContents">
+     <bool>false</bool>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QTextBrowser" name="textWindow">
+    <property name="geometry">
+     <rect>
+      <x>530</x>
+      <y>780</y>
+      <width>451</width>
+      <height>361</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>11</pointsize>
+     </font>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="cropButton">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>820</y>
+      <width>81</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Crop image</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="background1">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>760</y>
+      <width>991</width>
+      <height>421</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="preprocessingBox">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>890</y>
+      <width>251</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="editable">
+     <bool>false</bool>
+    </property>
+    <property name="currentText">
+     <string/>
+    </property>
+    <property name="currentIndex">
+     <number>-1</number>
+    </property>
+    <property name="placeholderText">
+     <string>Set preprocessing method</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="radonCheck">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>970</y>
+      <width>251</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Use radon transform (cropping required)</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="preprocessLabel">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>870</y>
+      <width>191</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>EAST preprocessing method</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ocrLabel">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>890</y>
+      <width>191</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Set OCR mode</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="ocrBox">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>910</y>
+      <width>221</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="editable">
+     <bool>false</bool>
+    </property>
+    <property name="currentText">
+     <string/>
+    </property>
+    <property name="currentIndex">
+     <number>-1</number>
+    </property>
+    <property name="placeholderText">
+     <string>Set OCR mode</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="scalingEdit">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>1020</y>
+      <width>31</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>100</string>
+    </property>
+    <property name="placeholderText">
+     <string>100</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="tsrctLabel">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>1020</y>
+      <width>61</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Set scaling:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="tsrctSettingsLabel">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>1000</y>
+      <width>161</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Tesseract preprocess settings:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="tsrctLabel_2">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>1050</y>
+      <width>71</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Blur amount:</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="blurEdit">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>1050</y>
+      <width>21</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>3</string>
+    </property>
+    <property name="placeholderText">
+     <string>3</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="tsrctLabel_3">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>1080</y>
+      <width>71</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Border size:</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="borderEdit">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>1080</y>
+      <width>21</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>10</string>
+    </property>
+    <property name="placeholderText">
+     <string>10</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="tsrctLabel_4">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>1040</y>
+      <width>211</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Min. word detection confidence:</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="confEdit">
+    <property name="geometry">
+     <rect>
+      <x>470</x>
+      <y>1040</y>
+      <width>21</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>30</string>
+    </property>
+    <property name="placeholderText">
+     <string>30</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="languageBox">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>960</y>
+      <width>221</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="languageLabel">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>940</y>
+      <width>191</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Set OCR language</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="tsrctLabel_5">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>870</y>
+      <width>161</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Tesseract detection settings:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="tsrctLabel_6">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>950</y>
+      <width>91</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>EAST resolution:</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="resEdit">
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>950</y>
+      <width>41</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>1280</string>
+    </property>
+    <property name="placeholderText">
+     <string>1280</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="tsrctLabel_7">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>920</y>
+      <width>81</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Filter strength:</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="strengthEdit">
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>920</y>
+      <width>41</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>def</string>
+    </property>
+    <property name="placeholderText">
+     <string>def</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="languageLabel_2">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>990</y>
+      <width>191</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Color removal method</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="tesMethodBox">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>1010</y>
+      <width>221</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <zorder>background1</zorder>
+   <zorder>openButton</zorder>
+   <zorder>runButton</zorder>
+   <zorder>resetCropButton</zorder>
+   <zorder>imageLabel</zorder>
+   <zorder>textWindow</zorder>
+   <zorder>cropButton</zorder>
+   <zorder>preprocessingBox</zorder>
+   <zorder>radonCheck</zorder>
+   <zorder>preprocessLabel</zorder>
+   <zorder>ocrLabel</zorder>
+   <zorder>ocrBox</zorder>
+   <zorder>scalingEdit</zorder>
+   <zorder>tsrctLabel</zorder>
+   <zorder>tsrctSettingsLabel</zorder>
+   <zorder>tsrctLabel_2</zorder>
+   <zorder>blurEdit</zorder>
+   <zorder>tsrctLabel_3</zorder>
+   <zorder>borderEdit</zorder>
+   <zorder>tsrctLabel_4</zorder>
+   <zorder>confEdit</zorder>
+   <zorder>languageBox</zorder>
+   <zorder>languageLabel</zorder>
+   <zorder>tsrctLabel_5</zorder>
+   <zorder>tsrctLabel_6</zorder>
+   <zorder>resEdit</zorder>
+   <zorder>tsrctLabel_7</zorder>
+   <zorder>strengthEdit</zorder>
+   <zorder>languageLabel_2</zorder>
+   <zorder>tesMethodBox</zorder>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>992</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
