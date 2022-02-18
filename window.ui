@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>992</width>
-    <height>1180</height>
+    <width>989</width>
+    <height>1184</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -90,9 +90,9 @@
     <property name="geometry">
      <rect>
       <x>530</x>
-      <y>780</y>
+      <y>790</y>
       <width>451</width>
-      <height>361</height>
+      <height>351</height>
      </rect>
     </property>
     <property name="font">
@@ -317,7 +317,7 @@
     <property name="geometry">
      <rect>
       <x>290</x>
-      <y>1040</y>
+      <y>990</y>
       <width>211</width>
       <height>16</height>
      </rect>
@@ -330,7 +330,7 @@
     <property name="geometry">
      <rect>
       <x>470</x>
-      <y>1040</y>
+      <y>990</y>
       <width>21</width>
       <height>22</height>
      </rect>
@@ -439,8 +439,8 @@
    <widget class="QLabel" name="languageLabel_2">
     <property name="geometry">
      <rect>
-      <x>290</x>
-      <y>990</y>
+      <x>20</x>
+      <y>1110</y>
       <width>191</width>
       <height>16</height>
      </rect>
@@ -452,11 +452,24 @@
    <widget class="QComboBox" name="tesMethodBox">
     <property name="geometry">
      <rect>
-      <x>290</x>
-      <y>1010</y>
+      <x>20</x>
+      <y>1130</y>
       <width>221</width>
       <height>22</height>
      </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="tsrctLabel_8">
+    <property name="geometry">
+     <rect>
+      <x>530</x>
+      <y>770</y>
+      <width>161</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Detected Text</string>
     </property>
    </widget>
    <zorder>background1</zorder>
@@ -489,13 +502,14 @@
    <zorder>strengthEdit</zorder>
    <zorder>languageLabel_2</zorder>
    <zorder>tesMethodBox</zorder>
+   <zorder>tsrctLabel_8</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>992</width>
+     <width>989</width>
      <height>22</height>
     </rect>
    </property>
