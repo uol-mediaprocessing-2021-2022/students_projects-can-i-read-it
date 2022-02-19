@@ -5,6 +5,7 @@ To execute the gui-version of our project (window.py) you have to install the fo
 
 * Python3.8 or higher (https://www.python.org/downloads/)
 * Tesseract-OCR (https://tesseract-ocr.github.io/tessdoc/Downloads.html)
+* PyQt5 (pip install PyQt5)
 * OpenCV (pip install opencv-python)
 * Numpy (pip install numpy)
 * Matplotlib (pip install matplotlib)
