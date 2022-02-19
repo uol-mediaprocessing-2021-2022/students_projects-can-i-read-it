@@ -20,8 +20,8 @@ class textdetect:
         boxes_list = None
 
         # Scales for image resizing (for EAST)
-        rW = None
-        rH = None
+        rW = 1
+        rH = 1
 
         def __init__(self, img): 
                 self.img = img  
@@ -340,7 +340,7 @@ class textdetect:
 
                 width = int(imge.shape[1] * scale_percent / 100)
                 height = int(imge.shape[0] * scale_percent / 100)
-                dim = (width, height) # TODO Why can this be 0 ???
+                dim = (width, height)
                 
                 # Resize image
                 resized = cv.resize(imge, dim, interpolation = cv.INTER_AREA)
@@ -407,12 +407,13 @@ class textdetect:
                         for index2, (startX, startY, endX, endY) in enumerate(elem):
                 
                                 # Calculate adjusted margins 
-                                y_start = int(startY * self.rH)
-                                y_end = int(endY *  self.rH)
-                                x_start = int(startX *  self.rW)
-                                x_end = int(endX *  self.rW)
+                                y_start = max(0, int(startY * self.rH))
+                                y_end = max(0, int(endY *  self.rH))
+                                x_start = max(0, int(startX *  self.rW))
+                                x_end = max(0, int(endX *  self.rW))
 
                                 cropped_img = tes_preprocess[y_start:y_end, x_start:x_end]
+
                                 cropped_img = self.preprocess_tsrct(cropped_img, scale_percent, bordersize, blur_amount, tes_method)
 
                                 # Configuration setting for converting image to string
