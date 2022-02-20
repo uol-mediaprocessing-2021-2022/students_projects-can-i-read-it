@@ -38,7 +38,7 @@ Let us take a look at the main windows user interface:
 * The purpose of the area in box 2 is to allow the user to manually change the EAST settings
 * The purpose of the area in box 3 is to allow the user to manually alter the tesseract preprocessing
 * The purpose of the area in box 4 is to allow the user to change the tesseract operating mode and language 
-* The area in box 5 will contain the detected text
+* The area in box 5 will contain the detected text after running the analysis
 
 We will now walk you through an exemplary user session of this application:
 
@@ -61,6 +61,8 @@ By using the dropdown menu in area 2 you can choose the preprocessing method for
 The box labeled with "EAST resolution" allows you to change the resolution that the textbox detection
 works with, a higher resolution can improve results but can also increase the runtime significantly. 
 !!Please note that the values for resolution have to be a multiple of 32 for the program to work.!!
+If the checkbox use radon transform is checked the image will be deskewed before EAST operates, if the image does
+contain details except for text, please crop the relevant part of the image to improve the stability of the deskewing.
 
 ## Adjust Tesseract preprocessing methods
 By changing the values in box 3 you can change the preprocessing settings for Tesseract.  The box labeled "Set scaling"
@@ -68,5 +70,7 @@ allow you to use the percentage in which the images are scaled, the box labeled 
 size for the smoothing filter and the box labeld "border size" allows you to increase or decrease the size of the padding. 
 The dropdown menu labeled color removal method allow you select a method for removing the colour from the image.
 
+## Change settings for Tesseract
+The dropdown menus in box 4 allow you to change the picture segmentation mode tesseract will be using 
 
 
