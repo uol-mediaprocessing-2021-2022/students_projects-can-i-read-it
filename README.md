@@ -40,6 +40,26 @@ Let us take a look at the main windows user interface:
 * The purpose of the area in box 4 is to allow the user to change the tesseract operating mode and language 
 * The area in box 5 will contain the detected text
 
+We will now walk you through an exemplary user session of this application:
 
+## Opening an image
+To load a picture, you have to press the button labeled ```open```, this will open a file-dialogue where you 
+can choose the picture.
+
+## Cropping an image
+After you have loaded the picture you want to analyze you may want to crop the relevant section of the image.
+To do so press the button labeled ```crop``` once and resize and move the blue box that appears on the picture
+according to your needs. If you now press ```crop``` again this will crop the selected region of the picture.
+If you are not satisfied with the cropped image you can always return to the original picture by pressing the
+```reset``` button.
+
+## Run the analysis
+After loading the picture (and optionally cropping it) you can run the text-detection by pressing ```Detect Text```.
+
+## Adjust EAST settings
+By using the dropdown menu in area 2 you can choose the preprocessing method for the EAST textbox detection. 
+The box labeled with "EAST resolution" allows you to change the resolution that the textbox detection
+works with, a higher resolution can improve results but can also increase the runtime significantly. 
+Please note that the values for resolution have to be a multiple of 32 for the program to work.
 
 
