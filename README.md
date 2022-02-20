@@ -5,6 +5,7 @@ To execute the gui-version of our project (window.py) you have to install the fo
 
 * Python3.8 or higher (https://www.python.org/downloads/)
 * Tesseract-OCR (https://tesseract-ocr.github.io/tessdoc/Downloads.html)
+* German language support for Tesseract (https://github.com/tesseract-ocr/tessdata/deu.traineddata)
 * PyQt5 (pip install PyQt5)
 * OpenCV (pip install opencv-python)
 * Numpy (pip install numpy)
@@ -61,8 +62,9 @@ By using the dropdown menu in area 2 you can choose the preprocessing method for
 The box labeled with "EAST resolution" allows you to change the resolution that the textbox detection
 works with, a higher resolution can improve results but can also increase the runtime significantly. 
 !!Please note that the values for resolution have to be a multiple of 32 for the program to work.!!
-If the checkbox use radon transform is checked the image will be deskewed before EAST operates, if the image does
-contain details except for text, please crop the relevant part of the image to improve the stability of the deskewing.
+If the checkbox use radon transform is checked the image will be deskewed before EAST operates. If you want to 
+use deskewing and the image does contain details except for text, please crop the relevant part of the image to improve 
+the stability of the deskewing.
 
 ## Adjust Tesseract preprocessing methods
 By changing the values in box 3 you can change the preprocessing settings for Tesseract.  The box labeled "Set scaling"
@@ -71,6 +73,8 @@ size for the smoothing filter and the box labeld "border size" allows you to inc
 The dropdown menu labeled color removal method allow you select a method for removing the colour from the image.
 
 ## Change settings for Tesseract
-The dropdown menus in box 4 allow you to change the picture segmentation mode tesseract will be using 
+The dropdown menus in box 4 allow you to change the picture segmentation mode tesseract will be using and the language tesseract
+uses for text detection. 
+Please note that if you want to use 
 
 
