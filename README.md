@@ -60,6 +60,13 @@ After loading the picture (and optionally cropping it) you can run the text-dete
 By using the dropdown menu in area 2 you can choose the preprocessing method for the EAST textbox detection. 
 The box labeled with "EAST resolution" allows you to change the resolution that the textbox detection
 works with, a higher resolution can improve results but can also increase the runtime significantly. 
-Please note that the values for resolution have to be a multiple of 32 for the program to work.
+!!Please note that the values for resolution have to be a multiple of 32 for the program to work.!!
+
+## Adjust Tesseract preprocessing methods
+By changing the values in box 3 you can change the preprocessing settings for Tesseract.  The box labeled "Set scaling"
+allow you to use the percentage in which the images are scaled, the box labeled "Blur amount" allows you to set the kernel
+size for the smoothing filter and the box labeld "border size" allows you to increase or decrease the size of the padding. 
+The dropdown menu labeled color removal method allow you select a method for removing the colour from the image.
+
 
 
