@@ -5,7 +5,7 @@ To execute the gui-version of our project (window.py) you have to install the fo
 
 * Python3.8 or higher (https://www.python.org/downloads/)
 * Tesseract-OCR (https://tesseract-ocr.github.io/tessdoc/Downloads.html)
-* German language support for Tesseract (https://github.com/tesseract-ocr/tessdata/deu.traineddata)
+* German language support for Tesseract (https://github.com/tesseract-ocr/tessdata/blob/main/deu.traineddata)
 * PyQt5 (pip install PyQt5)
 * OpenCV (pip install opencv-python)
 * Numpy (pip install numpy)
@@ -75,6 +75,6 @@ The dropdown menu labeled color removal method allow you select a method for rem
 ## Change settings for Tesseract
 The dropdown menus in box 4 allow you to change the picture segmentation mode tesseract will be using and the language tesseract
 uses for text detection. 
-Please note that if you want to use 
+
 
 
