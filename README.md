@@ -73,8 +73,19 @@ size for the smoothing filter and the box labeld "border size" allows you to inc
 The dropdown menu labeled color removal method allow you select a method for removing the colour from the image.
 
 ## Change settings for Tesseract
+By changing the value in the box labeled "Min. word detection confidence" you can change the confidence threshold for detecting
+a word. By increasing this value you will decrease the chance of noise falsely being detected as a word but this can also reduce
+the number of actual words that are detected.
 The dropdown menus in box 4 allow you to change the picture segmentation mode tesseract will be using and the language tesseract
-uses for text detection. 
+uses for text detection. To use the german language make sure you have installed the german language pack for Tesseract.
+
+Page segmentation modes:
+  1    Automatic page segmentation with OSD.
+  7    Treat the image as a single text line.
+  
+  
+  
+
 
 
 
